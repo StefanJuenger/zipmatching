@@ -35,7 +35,6 @@ However, contextual information is often not available at the ZIP code level.
 Instead, it refers to administrative units such as municipalities. 
 These two different spatial units often do not overlap, increasing uncertainty in the linking process.
 
-<!-- todo: add image -->
 ```{r, echo = F}
 
 # Load necessary libraries
@@ -112,19 +111,25 @@ For this tool application, we rely on three data sources: (synthetic) survey dat
 We base our analysis on survey data from the German Longitudinal Election Study (GLES). 
 The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year.
 Each cross-sectional sample includes approximately 1,000 respondents.
-The target population of the GLES Tracking includes citizens of the Federal Republic of Germany who were eligible to vote in elections to the German Bundestag at the time of the survey—i.e., German citizens who were at least 18 years old at the time of the survey.
 For this analysis, we use data from the "GLES Tracking November 2023, T56" (https://search.gesis.org/research_data/ZA7714). 
 Respondents were asked to indicate their approval of the German radical right party AfD on a scale from -5 ("I don't think highly of this party at all") to +5 ("I think very highly of this party") (variable t14i). 
 At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).
 
-**Info**
-Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the Secure Data Center at GESIS. For this tool application, we provide synthetic ZIP codes to illustrate the linking process.
+::: {.callout-note}
+Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the Secure Data Center at GESIS [add link]. For this tool application, we provide synthetic ZIP codes to illustrate the linking process.
+:::
 
 The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. 
-We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density).
 We rely on the Open Data portal ArcGIS Hub to access the geometries of the German ZIP code areas (add link) and municipalities (add link).
 Data can be downloaded directly as a shapefile or GeoJSON file. 
-For detailed information on handling geospatial data, refer to the [Git repository of Anne and Stefan] (add link).
+
+::: {.callout-caution collapse="true"}
+## Expand To Learn About Geospatial Dataformats
+
+We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density).
+For detailed information on handling geospatial data and using the package `sf`, refer to the course [Git repository of Anne and Stefan] (add link).
+:::
+
 
 # Assessing the Spatial Linkage
 
@@ -132,6 +137,7 @@ For detailed information on handling geospatial data, refer to the [Git reposito
 
 ## Tool functions
 
+- 
 
 # Getting started
 <!--paragraph dedicated for installation from tool (R package) and importing data or creating a synthetic data set-->
