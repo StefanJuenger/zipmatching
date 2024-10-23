@@ -206,14 +206,14 @@ municipalities_select <- municipalities %>%
 
 # Create the municipalities plot
 g_mun <- ggplot(data = municipalities_select) +
-  ggplot2::geom_sf(fill = "lightblue", color = "black", size = 0.1) +  
+  ggplot2::geom_sf(fill = "lightgrey", color = "black", size = 0.05) +  
   ggplot2::ggtitle("Municipalities") +
   ggplot2::theme_minimal() 
 
 # Create the zip codes plot
 g_zip <- ggplot() +
-  ggplot2::geom_sf(data = zip_codes, fill = "lightblue", color = "black", size = 0.1) + 
-  ggplot2::geom_sf(data = zip_codes_reduced, fill = "red", color = "black") +
+  ggplot2::geom_sf(data = zip_codes, fill = "lightgrey", color = "black", size = 0.05) + 
+# ggplot2::geom_sf(data = zip_codes_reduced, fill = "red", color = "black") +
   ggplot2::ggtitle("Zip Codes") +
   ggplot2::theme_minimal() 
 
