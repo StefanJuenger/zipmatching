@@ -191,7 +191,37 @@ zip_codes_reduced <-
 
 
 #  Inspecting data
-<!--todo: add maps for illustration of overlapping geometries, maybe simple check if all zip codes = 5 numbers and existing -->
+<!--todo: add maps for illustration of overlapping geometries, 
+maybe simple check if all zip codes = 5 numbers and existing -->
+
+```{r}
+
+library(patchwork)
+
+# Select relevant columns from municipalities
+municipalities_select <- municipalities %>%
+  dplyr::select(GEN, AGS)
+
+# Create the municipalities plot
+g_mun <- ggplot(data = municipalities_select) +
+  ggplot2::geom_sf(fill = "lightgrey", color = "black", size = 0.05) +  
+  ggplot2::ggtitle("Municipalities") +
+  ggplot2::theme_minimal() 
+
+# Create the zip codes plot
+g_zip <- ggplot() +
+  ggplot2::geom_sf(data = zip_codes, fill = "lightgrey", color = "black", size = 0.05) + 
+# ggplot2::geom_sf(data = zip_codes_reduced, fill = "red", color = "black") +
+  ggplot2::ggtitle("Zip Codes") +
+  ggplot2::theme_minimal() 
+
+# Combine the two plots using patchwork
+g_mun + g_zip
+
+
+
+```
+
 
 
 # Linking methods
