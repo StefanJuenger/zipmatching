@@ -20,8 +20,6 @@ knitr::opts_chunk$set(
 
 ```
 
-
-
 # Introduction
 
 Data integration of social indicators from surveys with geospatial context variables has rapidly progressed in recent years. 
