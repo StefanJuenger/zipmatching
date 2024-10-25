@@ -431,7 +431,9 @@ diff_real_zip_code_aggregated_map <-
   # Initialize ggplot for map
   ggplot() +
   # Add map layers with fill representing the best matching method
-  geom_sf(data = tmp, aes(fill = min_method), lwd = 0) +
+  geom_sf(
+    data = diff_real_zip_code_aggregated, aes(fill = min_method), lwd = 0
+  ) +
   # Use viridis color scale to differentiate methods
   scale_fill_viridis_d()
 
