@@ -459,12 +459,14 @@ ggplot2::ggsave(
 diff_real_zip_code_aggregated_map_differences <-
   # Initialize ggplot for map
   ggplot() +
+  geom_sf(data = zip_codes, lwd = .01) +
   # Add map layers with fill representing the difference
   geom_sf(
     data = diff_real_zip_code_aggregated, aes(fill = difference), lwd = 0
   ) +
   # Use viridis color scale to differentiate differences
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  facet_wrap(~min_method)
 
 # Save the map plot to a file ----
 ggplot2::ggsave(
