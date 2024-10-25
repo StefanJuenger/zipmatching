@@ -358,6 +358,15 @@ diff_real_zip_code_aggregated <-
       # Code 3 for areal interpolation method
       min_method == "mean_difference_areal_interpolation_abs" ~ 3
     )
+  ) |>
+  dplyr::mutate(
+    difference = dplyr::case_when(
+      min_method == "mean_difference_centroid_abs" ~ mean_difference_centroid,
+      min_method == "mean_difference_areal_abs" ~ mean_difference_areal,
+      min_method == "mean_difference_areal_interpolation_abs" ~
+        mean_difference_areal_interpolation,
+      TRUE ~ NA
+    )
   )
 
 # Create a histogram to visualize the distribution of differences for each matching method ----
@@ -447,3 +456,22 @@ ggplot2::ggsave(
   dpi = 600
 )
 
+diff_real_zip_code_aggregated_map_differences <-
+  # Initialize ggplot for map
+  ggplot() +
+  # Add map layers with fill representing the difference
+  geom_sf(
+    data = diff_real_zip_code_aggregated, aes(fill = difference), lwd = 0
+  ) +
+  # Use viridis color scale to differentiate differences
+  scale_fill_viridis_c()
+
+# Save the map plot to a file ----
+ggplot2::ggsave(
+  # Specify file name and output path
+  "./test/diff_real_zip_code_aggregated_map_differences.png",
+  # Reference the map plot
+  diff_real_zip_code_aggregated_map_differences,
+  # High resolution for clear saved image
+  dpi = 600
+)
