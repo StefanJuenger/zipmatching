@@ -45,9 +45,11 @@ These two different spatial units often do not overlap, increasing uncertainty i
 ```{r, echo = F}
 
 # Load necessary libraries
-library(sf)
 library(ggplot2)
 library(dplyr)
+library(patchwork)
+library(sf)
+library(tibble)
 
 
 # Function to create a realistic polygon for Municipality 1
