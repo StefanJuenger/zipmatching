@@ -234,13 +234,14 @@ A few words about GLES data and creating these synthetic data.
 #   # Select only the 'afd_rating' column for further analysis
 #   dplyr::select(afd_rating)
 
-
-# Generate random zip codes (for now) ----
+# Set a seed for random number generation to ensure reproducibility
+set.seed(201024)
 
 # Generate survey data
 num_cases <- 1118
 survey <- tibble(afd_rating = sample(1:11, num_cases, replace = TRUE))
 
+# Generate random zip codes (for now) ----
 
 # Sample zip codes for analysis
 zip_codes_sample <-
