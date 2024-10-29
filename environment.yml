@@ -1,6 +1,0 @@
-name: zipmatching
-channels:
-  - conda-forge
-dependencies:
-  - r-sf
-  - r-geojsonio
