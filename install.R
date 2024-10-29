@@ -2,4 +2,6 @@
 packages <- c("dplyr", "ggplot2", "sf", "tibble")
 
 # Install missing packages
-install.packages(setdiff(packages, rownames(installed.packages())))
+install.packages(setdiff(packages, rownames(installed.packages())),
+                 dependencies = TRUE
+                 )
