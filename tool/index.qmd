@@ -175,7 +175,7 @@ A few words about zip codes and municipalities.
 
 zip_codes <-
   # Load spatial data from GeoPackage file
-  sf::st_read("../raw-data/PLZ_Gebiete_7155512659375659703.gpkg") |>
+  sf::st_read("../data-raw/PLZ_Gebiete_7155512659375659703.gpkg") |>
   # Select only relevant columns: zip code and population
   dplyr::select(zip_code = plz, inhabitants_zip_code = einwohner)
 
@@ -183,7 +183,7 @@ zip_codes <-
 
 municipalities <-
   # Load spatial data from GeoPackage file
-  sf::st_read("../raw-data/Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg") |>
+  sf::st_read("../data-raw/Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg") |>
   # Select AGS (municipality code) and population columns
   dplyr::select(ags = AGS, inhabitants_municipality = EWZ)
 
@@ -226,19 +226,24 @@ A few words about GLES data and creating these synthetic data.
 #          zip_code =  ifelse(grepl("-93|-99|-97|-98", t71), NA, t71)) |> 
 #   dplyr::select(afd_rating, zip_code)
 
-#  Load the survey data from a .dta file (Stata format) ----
-survey <- haven::read_dta("../raw-data/ZA7714_v1-0-0.dta") |>
-  # Create a new column 'afd_rating': Set to NA if 't14h' is less than 0, 
-  # otherwise keep 't14h'
-  mutate(afd_rating = ifelse(t14h < 0, NA, t14h)) |> 
-  # Select only the 'afd_rating' column for further analysis
-  dplyr::select(afd_rating)
+# #  Load the survey data from a .dta file (Stata format) ----
+# survey <- haven::read_dta("../raw-data/ZA7714_v1-0-0.dta") |>
+#   # Create a new column 'afd_rating': Set to NA if 't14h' is less than 0, 
+#   # otherwise keep 't14h'
+#   mutate(afd_rating = ifelse(t14h < 0, NA, t14h)) |> 
+#   # Select only the 'afd_rating' column for further analysis
+#   dplyr::select(afd_rating)
 
 
 # Generate random zip codes (for now) ----
 
 # Set a seed for random number generation to ensure reproducibility
 set.seed(201024)
+
+# Generate survey data
+num_cases <- 1118
+survey <- tibble(afd_rating = sample(1:11, num_cases, replace = TRUE))
+
 
 # Sample zip codes for analysis
 zip_codes_sample <-
@@ -256,7 +261,7 @@ zip_codes_sample <-
                       dplyr::select(zip_code),
                     by = "zip_code") |>
   # Sample 1118 observations from the joined dataset with replacement
-  dplyr::sample_n(1118, replace = TRUE) 
+  dplyr::sample_n(num_cases, replace = TRUE) 
 
 
 # Set zip codes to missing and invalid to mirror original data
