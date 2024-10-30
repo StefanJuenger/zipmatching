@@ -35,12 +35,12 @@ Consequently, citizens may become more susceptible to far-right narratives, whic
 Therefore, one central research question is: Is living in a less densely populated area, such as a rural place, associated with far-right party preferences?
 To answer this question, it is necessary to link survey data with information about the respondents’ living environment.
 
-The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, such e.g. overlapping geospatial units that do not share commin bordrer(Qiu, Zhang, and Zhou 2012)https://bookdown.org/robinlovelace/geocompr/spatial-operations.html#ref-qiu_development_2012.
+The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g. overlapping geospatial units that do not share common border(Qiu, Zhang, and Zhou 2012)https://bookdown.org/robinlovelace/geocompr/spatial-operations.html#ref-qiu_development_2012.
 In many (online) surveys, respondents can indicate where they live by, for example, entering the ZIP code of their home address. 
 This information allows for the linking of contextual information about the respondents’ living environment like population density to the survey data. 
 However, contextual information is often not available at the ZIP code level.
 Instead, it refers to administrative units such as municipalities. 
-These two different spatial units often do not overlap, increasing uncertainty in the linking process.
+These two different spatial units are often not congruent, increasing uncertainty in the linking process.
 
 ```{r, echo = F}
 
@@ -110,9 +110,9 @@ ggplot() +
 
 This tool addresses this challenge by highlighting linking techniques that can be used to successfully link the datasets and assessing the uncertainty of the linking process.
 
-# Data Descritpion
+# Data Description
 
-For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas and the geographies of German municipalities including attributes of interests, in this case population density.
+For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interests, in this case population density.
 
 We base our analysis on survey data from the German Longitudinal Election Study (GLES). 
 The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year.
@@ -122,7 +122,7 @@ Respondents were asked to indicate their approval of the German radical right pa
 At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).
 
 ::: {.callout-important}
-Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the [Secure Data Center at GESIS](https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc). For this tool application, we provide synthetic data that reproduce the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.
+Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the [Secure Data Center at GESIS](https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc). For this tool application, we provide synthetic data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.
 :::
 
 The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. 
@@ -133,15 +133,15 @@ For detailed information on handling geospatial data and using the package `sf`,
 
 ## Tool Functions To Assess the Spatial Linking Process
 
-This tool application provides replicable code to guide user through the linking process and assess their linking strategy. The tutorial highlights the following steps:
+This tool application provides replicable code to guide the user through the linking process and assess their linking strategy. The tutorial highlights the following steps:
 
 - Centroid linkage: This technique involves linking data based on the central point (centroid) of a geographic area. For example, the centroid of a ZIP code area is linked to the municipality in which the centroid is located.
 
 - Areal matching: This method matches entire areas to one another, such as linking ZIP code areas to municipalities based on the largest overlapping area.
 
-- Areal interpolation: This advanced technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlaping area in proportion to the overlap. 
+- Areal interpolation: This advanced technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap. 
 
-- Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial dataa at hand.
+- Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial data at hand.
 
 - Influence of Linking Technique on Research Question: Analyzes how the choice of linking technique affects the outcomes and interpretations of the research question, ensuring that the conclusions drawn are robust and reliable.
 
@@ -152,7 +152,7 @@ This tool application provides replicable code to guide user through the linking
 There are several packages out there that allow geospatial data handling in R.
 Since we are working mainly with vector data, we heavily rely on the package [`sf`] (https://doi.org/10.32614/CRAN.package.sf).
 The packages `dplyr`, `ggplot2`, and `tibble` are used for data manipulation and visualization.
-For advanced users, we'd also like to refer the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expand the functions for area weighted interpolations [@Prener].
+For advanced users, we'd also like to refer to the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
 
 ```{r }
 
@@ -291,7 +291,7 @@ survey <-
 
 #  Inspecting data
 
-Before linking survey data , it is crucial to inspect the zip codes provided by respondents, especially when  participants entered their zip codes independently.
+Before linking survey data, it is crucial to inspect the zip codes provided by respondents, especially when  participants entered their zip codes independently.
 The self-reported nature of data entry can lead to several issues like refusal to respond or typographical errors, which can result in invalid or missing zip codes. 
 The provided code categorizes the self-reported zip codes into three statuses: "Non Response", "Invalid ZIP Code" (For instance, zip codes that are not five characters long or that do not exist in the predefined list of valid zip codes), and "Valid". 
 By utilizing this categorization, researchers can identify and address potential data quality issues before data integration.
