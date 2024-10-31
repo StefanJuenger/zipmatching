@@ -220,71 +220,7 @@ A few words about GLES data and creating these synthetic data.
 
 ```{r}
 
-# Real Data
-# survey <- haven::read_dta("./ZA7714_v1-0-0_RUF_2024-01-15.dta") |>
-#   mutate(afd_rating = ifelse(t14h < 0 , NA, t14h),
-#          zip_code =  ifelse(grepl("-93|-99|-97|-98", t71), NA, t71)) |> 
-#   dplyr::select(afd_rating, zip_code)
-
-# #  Load the survey data from a .dta file (Stata format) ----
-# survey <- haven::read_dta("../raw-data/ZA7714_v1-0-0.dta") |>
-#   # Create a new column 'afd_rating': Set to NA if 't14h' is less than 0, 
-#   # otherwise keep 't14h'
-#   mutate(afd_rating = ifelse(t14h < 0, NA, t14h)) |> 
-#   # Select only the 'afd_rating' column for further analysis
-#   dplyr::select(afd_rating)
-
-# Set a seed for random number generation to ensure reproducibility
-set.seed(201024)
-
-# Generate survey data
-num_cases <- 1118
-survey <- tibble(afd_rating = sample(1:11, num_cases, replace = TRUE))
-
-# Generate random zip codes (for now) ----
-
-# Sample zip codes for analysis
-zip_codes_sample <-
-  zip_codes |>
-  # Remove geometry information from the spatial data frame
-  sf::st_drop_geometry() |>
-  # Select only the 'zip_code' column
-  dplyr::select(zip_code) |>
-  # Randomly sample 950 unique zip codes
-  dplyr::slice_sample(n = 950) |>
-  # Join the sampled zip codes back to the original zip_codes data
-  # (to ensure validity)
-  dplyr::inner_join(zip_codes |>
-                      sf::st_drop_geometry() |>
-                      dplyr::select(zip_code),
-                    by = "zip_code") |>
-  # Sample 1118 observations from the joined dataset with replacement
-  dplyr::sample_n(num_cases, replace = TRUE) 
-
-# Set zip codes to missing and invalid to mirror original data
-
-# Calculate the number of zip codes to modify: 1.7% of the total rows
-# in zip_codes_sample
-n_to_modify <- floor(0.017 * nrow(zip_codes_sample))  
-
-# Randomly select which rows will have their zip codes modified
-rows_to_modify <- sample(1:nrow(zip_codes_sample), n_to_modify)
-
-# Update the survey data with sampled zip codes and set missing/invalid
-survey <-
-  survey |>
-  # Bind the sampled zip codes to the survey data (adds zip_code column)
-  dplyr::bind_cols(zip_codes_sample) |>
-  # Modify the zip_code column
-  dplyr::mutate(
-    # set rows invalid by appending a random digit to the existing zip code
-    zip_code = ifelse(row_number() %in% rows_to_modify,
-                      paste0(zip_code, sample(0:9, n_to_modify, replace = TRUE)),
-                      zip_code),
-    # Randomly set 7% of the zip_code values to NA
-    zip_code = ifelse(runif(n()) < 0.07, NA, zip_code)
-  ) 
-
+survey <- readRDS("./data-raw/simulated_survey_data.rds")
 
 ```
 

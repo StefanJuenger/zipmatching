@@ -113,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Introduction</h1>
 <p>Data integration of social indicators from surveys with geospatial context variables has rapidly progressed in recent years. Applications in the social sciences are manifold, covering issues such as conflict and migration, political participation, environmental attitudes, and inequality. Geospatial approaches allow researchers to introduce new perspectives in explaining societal processes and emphasize the local aspects of globally relevant questions.</p>
 <p>As an example, this tool application addresses the discourse on the rural-urban divide, which has received considerable attention in recent years. Rural areas can serve as breeding grounds for political discontent because citizens’ perceptions of their living environment may foster a sense of neglect, resource deprivation, and lack of societal respect. Consequently, citizens may become more susceptible to far-right narratives, which could explain the rise of populist and far-right sentiments in rural areas. Therefore, one central research question is: Is living in a less densely populated area, such as a rural place, associated with far-right party preferences? To answer this question, it is necessary to link survey data with information about the respondents’ living environment.</p>
-<p>The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, such e.g.&nbsp;overlapping geospatial units that do not share commin bordrer(Qiu, Zhang, and Zhou 2012)https://bookdown.org/robinlovelace/geocompr/spatial-operations.html#ref-qiu_development_2012. In many (online) surveys, respondents can indicate where they live by, for example, entering the ZIP code of their home address. This information allows for the linking of contextual information about the respondents’ living environment like population density to the survey data. However, contextual information is often not available at the ZIP code level. Instead, it refers to administrative units such as municipalities. These two different spatial units often do not overlap, increasing uncertainty in the linking process.</p>
+<p>The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g.&nbsp;overlapping geospatial units that do not share common border(Qiu, Zhang, and Zhou 2012)https://bookdown.org/robinlovelace/geocompr/spatial-operations.html#ref-qiu_development_2012. In many (online) surveys, respondents can indicate where they live by, for example, entering the ZIP code of their home address. This information allows for the linking of contextual information about the respondents’ living environment like population density to the survey data. However, contextual information is often not available at the ZIP code level. Instead, it refers to administrative units such as municipalities. These two different spatial units are often not congruent, increasing uncertainty in the linking process.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -125,9 +125,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>This tool addresses this challenge by highlighting linking techniques that can be used to successfully link the datasets and assessing the uncertainty of the linking process.</p>
 </section>
-<section id="data-descritpion" class="level1">
-<h1>Data Descritpion</h1>
-<p>For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas and the geographies of German municipalities including attributes of interests, in this case population density.</p>
+<section id="data-description" class="level1">
+<h1>Data Description</h1>
+<p>For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interests, in this case population density.</p>
 <p>We base our analysis on survey data from the German Longitudinal Election Study (GLES). The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year. Each cross-sectional sample includes approximately 1,000 respondents. For this analysis, we use data from the <a href="https://search.gesis.org/research_data/ZA7714">GLES Tracking November 2023, T56</a>. Respondents were asked to indicate their approval of the German radical right party AfD on a scale from -5 (“I don’t think highly of this party at all”) to +5 (“I think very highly of this party”) (variable t14h). At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -139,18 +139,18 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the <a href="https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc">Secure Data Center at GESIS</a>. For this tool application, we provide synthetic data that reproduce the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.</p>
+<p>Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the <a href="https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc">Secure Data Center at GESIS</a>. For this tool application, we provide synthetic data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.</p>
 </div>
 </div>
 <p>The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. We rely on the Open Data portal ArcGIS Hub to access the geometries of the <a href="https://hub.arcgis.com/maps/esri-de-content::postleitzahlengebiete-in-deutschland">German ZIP code areas</a> and <a href="https://hub.arcgis.com/maps/60eb682c95f44ba7b10fee66d871859d">municipalities</a>. Data can be downloaded directly as a shapefile or GeoPackage file. We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density). For detailed information on handling geospatial data and using the package <code>sf</code>, refer to the course <a href="https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2024/">“Introduction to Geospatial Techniques for Social Scientists in R” (April 23/24, 2024) by Stefan Jünger and Anne Stroppe</a>.</p>
 <section id="tool-functions-to-assess-the-spatial-linking-process" class="level2">
 <h2 class="anchored" data-anchor-id="tool-functions-to-assess-the-spatial-linking-process">Tool Functions To Assess the Spatial Linking Process</h2>
-<p>This tool application provides replicable code to guide user through the linking process and assess their linking strategy. The tutorial highlights the following steps:</p>
+<p>This tool application provides replicable code to guide the user through the linking process and assess their linking strategy. The tutorial highlights the following steps:</p>
 <ul>
 <li><p>Centroid linkage: This technique involves linking data based on the central point (centroid) of a geographic area. For example, the centroid of a ZIP code area is linked to the municipality in which the centroid is located.</p></li>
 <li><p>Areal matching: This method matches entire areas to one another, such as linking ZIP code areas to municipalities based on the largest overlapping area.</p></li>
-<li><p>Areal interpolation: This advanced technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlaping area in proportion to the overlap.</p></li>
-<li><p>Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial dataa at hand.</p></li>
+<li><p>Areal interpolation: This advanced technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap.</p></li>
+<li><p>Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial data at hand.</p></li>
 <li><p>Influence of Linking Technique on Research Question: Analyzes how the choice of linking technique affects the outcomes and interpretations of the research question, ensuring that the conclusions drawn are robust and reliable.</p></li>
 </ul>
 </section>
@@ -159,7 +159,7 @@ Important
 <h1>Getting started</h1>
 <section id="packages" class="level2">
 <h2 class="anchored" data-anchor-id="packages">Packages</h2>
-<p>There are several packages out there that allow geospatial data handling in R. Since we are working mainly with vector data, we heavily rely on the package [<code>sf</code>] (https://doi.org/10.32614/CRAN.package.sf). The packages <code>dplyr</code>, <code>ggplot2</code>, and <code>tibble</code> are used for data manipulation and visualization. For advanced users, we’d also like to refer the package <a href="https://github.com/chris-prener/areal"><code>areal</code></a> that builds upon the <code>sf</code>package we use here and expand the functions for area weighted interpolations <span class="citation" data-cites="Prener">[@Prener]</span>.</p>
+<p>There are several packages out there that allow geospatial data handling in R. Since we are working mainly with vector data, we heavily rely on the package [<code>sf</code>] (https://doi.org/10.32614/CRAN.package.sf). The packages <code>dplyr</code>, <code>ggplot2</code>, and <code>tibble</code> are used for data manipulation and visualization. For advanced users, we’d also like to refer to the package <a href="https://github.com/chris-prener/areal"><code>areal</code></a> that builds upon the <code>sf</code>package we use here and expands the functions for area weighted interpolations <span class="citation" data-cites="Prener">[@Prener]</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary packages ----</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -182,7 +182,7 @@ Important
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">zip_code =</span> plz, <span class="at">inhabitants_zip_code =</span> einwohner)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `OSM_PLZ' from data source 
-  `H:\zipmatching\data-raw\PLZ_Gebiete_7155512659375659703.gpkg' 
+  `C:\Users\stroppan\Documents\zipmatching\data-raw\PLZ_Gebiete_7155512659375659703.gpkg' 
   using driver `GPKG'
 Simple feature collection with 8170 features and 4 fields
 Geometry type: MULTIPOLYGON
@@ -199,7 +199,7 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">ags =</span> AGS, <span class="at">inhabitants_municipality =</span> EWZ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `GEM_ew_22' from data source 
-  `H:\zipmatching\data-raw\Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg' 
+  `C:\Users\stroppan\Documents\zipmatching\data-raw\Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg' 
   using driver `GPKG'
 Simple feature collection with 10990 features and 17 fields
 Geometry type: MULTIPOLYGON
@@ -222,76 +222,13 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 <h2 class="anchored" data-anchor-id="survey-data">Survey Data</h2>
 <p>A few words about GLES data and creating these synthetic data.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Real Data</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># survey &lt;- haven::read_dta("./ZA7714_v1-0-0_RUF_2024-01-15.dta") |&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(afd_rating = ifelse(t14h &lt; 0 , NA, t14h),</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#          zip_code =  ifelse(grepl("-93|-99|-97|-98", t71), NA, t71)) |&gt; </span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::select(afd_rating, zip_code)</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># #  Load the survey data from a .dta file (Stata format) ----</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># survey &lt;- haven::read_dta("../raw-data/ZA7714_v1-0-0.dta") |&gt;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Create a new column 'afd_rating': Set to NA if 't14h' is less than 0, </span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   # otherwise keep 't14h'</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(afd_rating = ifelse(t14h &lt; 0, NA, t14h)) |&gt; </span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Select only the 'afd_rating' column for further analysis</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::select(afd_rating)</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a seed for random number generation to ensure reproducibility</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">201024</span>)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate survey data</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>num_cases <span class="ot">&lt;-</span> <span class="dv">1118</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">afd_rating =</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>, num_cases, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate random zip codes (for now) ----</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample zip codes for analysis</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>zip_codes_sample <span class="ot">&lt;-</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  zip_codes <span class="sc">|&gt;</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove geometry information from the spatial data frame</span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Select only the 'zip_code' column</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(zip_code) <span class="sc">|&gt;</span></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Randomly sample 950 unique zip codes</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">950</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the sampled zip codes back to the original zip_codes data</span></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># (to ensure validity)</span></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(zip_codes <span class="sc">|&gt;</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>                      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>                      dplyr<span class="sc">::</span><span class="fu">select</span>(zip_code),</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>                    <span class="at">by =</span> <span class="st">"zip_code"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Sample 1118 observations from the joined dataset with replacement</span></span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">sample_n</span>(num_cases, <span class="at">replace =</span> <span class="cn">TRUE</span>) </span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Set zip codes to missing and invalid to mirror original data</span></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the number of zip codes to modify: 1.7% of the total rows</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co"># in zip_codes_sample</span></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>n_to_modify <span class="ot">&lt;-</span> <span class="fu">floor</span>(<span class="fl">0.017</span> <span class="sc">*</span> <span class="fu">nrow</span>(zip_codes_sample))  </span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomly select which rows will have their zip codes modified</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>rows_to_modify <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(zip_codes_sample), n_to_modify)</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Update the survey data with sampled zip codes and set missing/invalid</span></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>  survey <span class="sc">|&gt;</span></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Bind the sampled zip codes to the survey data (adds zip_code column)</span></span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_cols</span>(zip_codes_sample) <span class="sc">|&gt;</span></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Modify the zip_code column</span></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># set rows invalid by appending a random digit to the existing zip code</span></span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">zip_code =</span> <span class="fu">ifelse</span>(<span class="fu">row_number</span>() <span class="sc">%in%</span> rows_to_modify,</span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">paste0</span>(zip_code, <span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">9</span>, n_to_modify, <span class="at">replace =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>                      zip_code),</span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Randomly set 7% of the zip_code values to NA</span></span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">zip_code =</span> <span class="fu">ifelse</span>(<span class="fu">runif</span>(<span class="fu">n</span>()) <span class="sc">&lt;</span> <span class="fl">0.07</span>, <span class="cn">NA</span>, zip_code)</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"./data-raw/simulated_survey_data.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="inspecting-data" class="level1">
 <h1>Inspecting data</h1>
-<p>Before linking survey data , it is crucial to inspect the zip codes provided by respondents, especially when participants entered their zip codes independently. The self-reported nature of data entry can lead to several issues like refusal to respond or typographical errors, which can result in invalid or missing zip codes. The provided code categorizes the self-reported zip codes into three statuses: “Non Response”, “Invalid ZIP Code” (For instance, zip codes that are not five characters long or that do not exist in the predefined list of valid zip codes), and “Valid”. By utilizing this categorization, researchers can identify and address potential data quality issues before data integration. <!--- footnote: could also try to resolve issues with zip codes --></p>
+<p>Before linking survey data, it is crucial to inspect the zip codes provided by respondents, especially when participants entered their zip codes independently. The self-reported nature of data entry can lead to several issues like refusal to respond or typographical errors, which can result in invalid or missing zip codes. The provided code categorizes the self-reported zip codes into three statuses: “Non Response”, “Invalid ZIP Code” (For instance, zip codes that are not five characters long or that do not exist in the predefined list of valid zip codes), and “Valid”. By utilizing this categorization, researchers can identify and address potential data quality issues before data integration. <!--- footnote: could also try to resolve issues with zip codes --></p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new column 'status' to categorize the zip codes</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span> survey <span class="sc">|&gt;</span></span>
@@ -329,12 +266,12 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 <pre><code># A tibble: 3 × 3
   status             count  freq
   &lt;chr&gt;              &lt;int&gt; &lt;dbl&gt;
-1 1 Non Response        72  6.44
-2 2 Invalid ZIP Code    17  1.52
-3 3 Valid             1029 92.0 </code></pre>
+1 1 Non Response        63   6.3
+2 2 Invalid ZIP Code    17   1.7
+3 3 Valid              920  92  </code></pre>
 </div>
 </div>
-<p>In this case, 6.4400716% of respondents did not answer the zip code question, and 1.5205725% provided an invalid zip code. What we do not check here is whether respondents entered their correct zip code. Depending on the data at hand, it might be possible to verify whether other self-reported data, such as the federal state, or data from other sources align with this information.</p>
+<p>In this case, 6.3% of respondents did not answer the zip code question, and 1.7% provided an invalid zip code. What we do not check here is whether respondents entered their correct zip code. Depending on the data at hand, it might be possible to verify whether other self-reported data, such as the federal state, or data from other sources align with this information.</p>
 <p>For the ongoing linking process, we exclude all observations that did not enter a zip code or entered an invalid one, working instead with a subsample of all valid zip codes in the survey. Since we will use more spatial techniques in the following analysis, we rely on this reduced spatial data frame.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
