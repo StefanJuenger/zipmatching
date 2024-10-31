@@ -9,7 +9,7 @@
 <meta name="author" content="Anne Stroppe">
 <meta name="author" content="Stefan Jünger">
 
-<title>Assessment of Uncertain Geospatial Linking</title>
+<title>(Assessment of) Geospatial Linking of Incongruent Units</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +81,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assessment of Uncertain Geospatial Linking</h1>
+<h1 class="title">(Assessment of) Geospatial Linking of Incongruent Units</h1>
 </div>
 
 
@@ -128,7 +128,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data-description" class="level1">
 <h1>Data Description</h1>
 <p>For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interests, in this case population density.</p>
-<p>We base our analysis on survey data from the German Longitudinal Election Study (GLES). The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year. Each cross-sectional sample includes approximately 1,000 respondents. For this analysis, we use data from the <a href="https://search.gesis.org/research_data/ZA7714">GLES Tracking November 2023, T56</a>. Respondents were asked to indicate their approval of the German radical right party AfD on a scale from -5 (“I don’t think highly of this party at all”) to +5 (“I think very highly of this party”) (variable t14h). At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).</p>
+<p>We base our analysis example on survey data from the German Longitudinal Election Study (GLES). The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year. Each cross-sectional sample includes approximately 1,000 respondents. For this analysis, we use data from the <a href="https://search.gesis.org/research_data/ZA7714">GLES Tracking November 2023, T56</a>. Respondents were asked to indicate their approval of the German radical right party AfD on a scale from 1 (“I don’t think highly of this party at all”) to 11 (“I think very highly of this party”) (variable t14h). At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -139,10 +139,10 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the <a href="https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc">Secure Data Center at GESIS</a>. For this tool application, we provide synthetic data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.</p>
+<p>Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the <a href="https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc">Secure Data Center at GESIS</a>. For this tool application, we provide simulated data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence and the interviewee.</p>
 </div>
 </div>
-<p>The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. We rely on the Open Data portal ArcGIS Hub to access the geometries of the <a href="https://hub.arcgis.com/maps/esri-de-content::postleitzahlengebiete-in-deutschland">German ZIP code areas</a> and <a href="https://hub.arcgis.com/maps/60eb682c95f44ba7b10fee66d871859d">municipalities</a>. Data can be downloaded directly as a shapefile or GeoPackage file. We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density). For detailed information on handling geospatial data and using the package <code>sf</code>, refer to the course <a href="https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2024/">“Introduction to Geospatial Techniques for Social Scientists in R” (April 23/24, 2024) by Stefan Jünger and Anne Stroppe</a>.</p>
+<p>The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. We rely on the Open Data portal ArcGIS Hub to access the geometries of the <a href="https://hub.arcgis.com/maps/esri-de-content::postleitzahlengebiete-in-deutschland">German ZIP code areas</a> and <a href="https://hub.arcgis.com/maps/60eb682c95f44ba7b10fee66d871859d">municipalities</a>. Data can be downloaded directly as a shapefile or GeoPackage file. We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density). For detailed information on handling geospatial data and using the package <code>sf</code>, you can refer to our course <a href="https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2024/">“Introduction to Geospatial Techniques for Social Scientists in R”</a>.</p>
 <section id="tool-functions-to-assess-the-spatial-linking-process" class="level2">
 <h2 class="anchored" data-anchor-id="tool-functions-to-assess-the-spatial-linking-process">Tool Functions To Assess the Spatial Linking Process</h2>
 <p>This tool application provides replicable code to guide the user through the linking process and assess their linking strategy. The tutorial highlights the following steps:</p>
@@ -159,7 +159,7 @@ Important
 <h1>Getting started</h1>
 <section id="packages" class="level2">
 <h2 class="anchored" data-anchor-id="packages">Packages</h2>
-<p>There are several packages out there that allow geospatial data handling in R. Since we are working mainly with vector data, we heavily rely on the package [<code>sf</code>] (https://doi.org/10.32614/CRAN.package.sf). The packages <code>dplyr</code>, <code>ggplot2</code>, and <code>tibble</code> are used for data manipulation and visualization. For advanced users, we’d also like to refer to the package <a href="https://github.com/chris-prener/areal"><code>areal</code></a> that builds upon the <code>sf</code>package we use here and expands the functions for area weighted interpolations <span class="citation" data-cites="Prener">[@Prener]</span>.</p>
+<p>There are several packages out there that allow geospatial data handling in R. Since we are working mainly with vector data, we heavily rely on the package <a href="https://doi.org/10.32614/CRAN.package.sf">sf</a>. The packages <code>dplyr</code>, <code>ggplot2</code>, and <code>tibble</code> are used for data manipulation and visualization.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary packages ----</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -171,7 +171,8 @@ Important
 </section>
 <section id="geospatial-data" class="level2">
 <h2 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h2>
-<p>A few words about zip codes and municipalities.</p>
+<p>In Germany, the 5-character zip code areas often do not align with municipal boundaries, leading to both overlap and incongruence. This mismatch can be more pronounced in rural areas, where larger zip code regions may encompass multiple small municipalities. In contrast, urban areas tend to have several distinct zip codes that fall within a single municipality. For example, the capital Berlin, as a German ‘city-state’, is one municipality with 190 zip codes.</p>
+<p>When selecting and loading the geospatial data, we always check for three sources of errors: - Consistent (projected) coordinate reference systems. In our case, both shapefiles are projected in WGS 84 (EPSG: 3857). - Timeliness of administrative boundaries and territorial reforms. For example, we use the 2022 municipality boundaries and the 2023 zip code areas. - Existence, column names, and format of identifiers and variables of interest. For instance, we require the zip code and municipality code to be in character format in our data frame.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load zip code data ----</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -208,6 +209,7 @@ Bounding box:  xmin: 653028 ymin: 5986277 xmax: 1674447 ymax: 7373282
 Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 </div>
 </div>
+<p>We also advice to always plot the data for a visual inspection of the prjection and completeness of the geospatial information.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -273,19 +275,6 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 </div>
 <p>In this case, 6.3% of respondents did not answer the zip code question, and 1.7% provided an invalid zip code. What we do not check here is whether respondents entered their correct zip code. Depending on the data at hand, it might be possible to verify whether other self-reported data, such as the federal state, or data from other sources align with this information.</p>
 <p>For the ongoing linking process, we exclude all observations that did not enter a zip code or entered an invalid one, working instead with a subsample of all valid zip codes in the survey. Since we will use more spatial techniques in the following analysis, we rely on this reduced spatial data frame.</p>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Important
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>If you want to create a complete matching list between all zip codes and all municipalities in Germany, you can also use the complete zip code data set. However, it might take a while to create this data set and run the spatial joins. We will refer to this reference data set throughout the tool application and provide the code in the code section for you to replicate this reference data set.</p>
-</div>
-</div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a reduced dataset based on the valid zip codes from the survey data</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>zip_codes_valid <span class="ot">&lt;-</span></span>
@@ -297,12 +286,25 @@ Important
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert the resulting data frame to a simple features (sf) </span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_as_sf</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you want to create a complete matching list between all zip codes and all municipalities in Germany, you can also use the complete zip code data set. However, it might take a while to create this data set and run the spatial joins. <!-- The script and data are provided under additional material --></p>
+</div>
+</div>
 </section>
 <section id="linking-methods" class="level1">
 <h1>Linking methods</h1>
-<!--probably here the sub-headers will vary heavily with the specific tool application. I am adding some examples from our resquin tool tutorial-->
-<section id="preparation" class="level2">
-<h2 class="anchored" data-anchor-id="preparation">Preparation</h2>
+<section id="simulate-respondents-place-of-living" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-respondents-place-of-living">Simulate respondents place of living</h2>
+<p>We’re sampling 1,000 points within each valid zip code area to later assess the accuracy of our linking techniques. By simulating 1,000 hypothetical living locations for respondents who reported living in a specific zip code area, we can evaluate whether our method accurately aligns each sampled point with the correct municipality. This approach allows us to identify any discrepancies or inaccuracies in the linking process and compare the three linking methods.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample points within zip code areas ----</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomly sample points within each zip code area. Note: This can take a long</span></span>
@@ -336,20 +338,30 @@ Important
 </section>
 <section id="centroid-linking" class="level2">
 <h2 class="anchored" data-anchor-id="centroid-linking">Centroid linking</h2>
-<p>This method uses the centroid (center point) of each zip code area to find the corresponding municipality. It assumes that the center point accurately represents the zip code’s location in terms of municipality boundaries.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>centroid_matched <span class="ot">&lt;-</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  zip_codes_valid <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the centroid for each zip code area</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_point_on_surface</span>() <span class="sc">|&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Spatially join centroids with municipality data</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_join</span>(municipalities) <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Select relevant columns</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(zip_code, inhabitants_zip_code, inhabitants_municipality) <span class="sc">|&gt;</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove any duplicate rows</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Arrange by zip code for easy viewing</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(zip_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This method uses the centroid (center point) of each zip code area to find the corresponding municipality. It assumes that the center point accurately represents the zip code’s location in terms of municipality boundaries. One benefit of this approach is its simplicity and efficiency, allowing for quick linking process. However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the zip code area, nor does it account for the actual overlap or shape of the units.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Centroid linking ----</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>centroid_matched <span class="ot">&lt;-</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  zip_codes_valid <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the centroid for each zip code area</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_point_on_surface</span>() <span class="sc">|&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Spatially join centroids with municipality data</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_join</span>(municipalities) <span class="sc">|&gt;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Select relevant columns</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(zip_code, inhabitants_zip_code, inhabitants_municipality) <span class="sc">|&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove any duplicate rows</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Arrange by zip code for easy viewing</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(zip_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="areal-matching" class="level2">
@@ -372,7 +384,7 @@ Important
 </section>
 <section id="areal-interpolation" class="level2">
 <h2 class="anchored" data-anchor-id="areal-interpolation">Areal interpolation</h2>
-<p>This method uses areal interpolation to distribute municipality inhabitants data proportionally across overlapping zip code areas. It estimates the inhabitants for each zip code based on the proportion of its area that overlaps with each municipality.</p>
+<p>This method uses areal interpolation to distribute municipality inhabitants data proportionally across overlapping zip code areas. It estimates the inhabitants for each zip code based on the proportion of its area that overlaps with each municipality. For advanced users, we’d also like to refer to the package <a href="https://github.com/chris-prener/areal"><code>areal</code></a> that builds upon the <code>sf</code>package we use here and expands the functions for area weighted interpolations <span class="citation" data-cites="Prener">[@Prener]</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Areal interpolation matching method ----</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -685,7 +697,7 @@ Important
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -719,7 +731,7 @@ Important
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
 </figure>
 </div>
 </div>
