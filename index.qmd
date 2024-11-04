@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Data integration of social indicators from surveys with geospatial context variables has rapidly progressed in recent years. 
+Data integration of social indicators from surveys with geospatial context variables has rapidly progressed. 
 Applications in the social sciences are manifold, covering issues such as conflict and migration, political participation, environmental attitudes, and inequality. 
 Geospatial approaches allow researchers to introduce new perspectives in explaining societal processes and emphasize the local aspects of globally relevant questions.
 
@@ -110,14 +110,20 @@ ggplot() +
 
 This tool addresses this challenge by highlighting linking techniques that can be used to successfully link the datasets and assessing the uncertainty of the linking process.
 
-# Data Description
+# Data Prerequisites and Description
 
-For this tool application, we rely on three data sources: (synthetic) survey data, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interests, in this case population density.
+To replicate this tool, researchers need the following:
+
+- Survey data that includes an identifier for the target areal units where respondents reside and which they wish to match
+- The geometries of the target areal units 
+- The geometries of the areal units that includes the context information they are interested in
+
+For this tool application, we rely on three data sources: (synthetic) survey data including self-reported ZIP codes, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interests, in this case population density.
 
 We base our analysis example on survey data from the German Longitudinal Election Study (GLES). 
 The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year.
 Each cross-sectional sample includes approximately 1,000 respondents.
-For this analysis, we use data from the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
+For this analysis, we create a synthetic data set based on the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
 Respondents were asked to indicate their approval of the German radical right party AfD on a scale from 1 ("I don't think highly of this party at all") to 11 ("I think very highly of this party") (variable t14h). 
 At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).
 
@@ -131,7 +137,7 @@ Data can be downloaded directly as a shapefile or GeoPackage file.
 We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density).
 For detailed information on handling geospatial data and using the package `sf`, you can refer to our course [“Introduction to Geospatial Techniques for Social Scientists in R”](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2024/).
 
-## Tool Functions To Assess the Spatial Linking Process
+# Tool Functions To Assess the Spatial Linking Process
 
 This tool application provides replicable code to guide the user through the linking process and assess their linking strategy. The tutorial highlights the following steps:
 
@@ -139,7 +145,7 @@ This tool application provides replicable code to guide the user through the lin
 
 - Areal matching: This method matches entire areas to one another, such as linking ZIP code areas to municipalities based on the largest overlapping area.
 
-- Areal interpolation: This advanced technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap. 
+- Areal interpolation: This technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap. 
 
 - Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial data at hand.
 
@@ -223,7 +229,12 @@ g_mun + g_zip
 
 ## Survey Data
 
-A few words about GLES data and creating these synthetic data.
+Due to data protection regulations, we cannot use real-world survey but we base our tool application on simulated data that were created on  the basis of the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
+To prepare the simulated data, we clean the original survey data to retain only valid zip codes and then link the data with geospatial data using centroid and areal matching techniques, followed by area-weighted interpolation for population and area estimates. 
+Finally, we calculate correlations between the variable of interest, "afd_rating", and from the geospatial data derived population densities.
+In a next step, we generate random ZIP codes, introducing some invalid entries to mimic the real-world data.
+We repeat the linking process and then simulate the dependent variable based on the original correlations to derive with the simulated data.
+To replicate the creation of the simulate survey data, we provide the R-Script [here](./test/create_simulated_survey.R).
 
 ```{r}
 
@@ -300,7 +311,7 @@ If you want to create a complete matching list between all zip codes and all mun
 :::
 
 
-# Linking methods
+# Matching methods
 
 ## Simulate respondents place of living
 
@@ -343,7 +354,10 @@ points_with_real_inhabitants_municipality <-
 
 ```
 
-## Centroid linking
+## Centroid matching
+
+This method uses the centroid (center point) of each zip code area to find the corresponding municipality.
+It assumes that the center point accurately represents the zip code's location in terms of municipality boundaries.
 
 ```{r, echo = F}
 
@@ -453,10 +467,9 @@ map2 <- ggplot() +
 
 ```
 
-This method uses the centroid (center point) of each zip code area to find the corresponding municipality.
-It assumes that the center point accurately represents the zip code's location in terms of municipality boundaries.
 One benefit of this approach is its simplicity and efficiency, allowing for quick linking process. 
 However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the zip code area, nor does it account for the actual overlap or shape of the units.
+To do the linking process, we need to calculate centroids for each zip code and use the `sf::st_join` function to identify in which municipality each centroid is located.
 
 ```{r}
 
@@ -480,6 +493,110 @@ centroid_matched <-
 
 This method assigns each zip code area to the municipality in which the  majority of its area lies.
 
+```{r, echo = FALSE}
+
+
+# Function to create a realistic polygon for Municipality 1
+create_municipality_polygon <- function() {
+  coords <- matrix(c(
+    0, 0,     # Bottom-left
+    1, 0,
+    3, 0.5,   # Bottom-right
+    3.4, 1.5,   # Middle-right
+    3, 2,     # Top-right
+    0.5, 2,     # Top-left
+    0.8, 1.5,  # Middle-left
+    0, 0     # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+# Create Municipality 1
+municipality1 <- create_municipality_polygon()
+municipality1$id <- "Municipality 1"
+
+
+create_municipality_polygon <- function() {
+  coords <- matrix(c(
+    0, 0,     # Bottom-left
+    1,0,
+    3, 0.5,   # Bottom-right
+    3.4, 1.5,   # Middle-right
+    3.4,-0.5,
+    0,0
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+municipality2 <- create_municipality_polygon()
+municipality2$id <- "Municipality 2"
+
+# Function to create a realistic polygon for Postal Code Area 1
+create_zip_code_polygon1 <- function() {
+  coords <- matrix(c(
+    1, -0.5,     # Bottom-left
+    3, -0.5,    # Bottom-right
+    3, 1.5,     # Top-right
+    1, 1.5,     # Top-left
+    1, -0.5      # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+# Create Postal Code Area 1
+zip_code1 <- create_zip_code_polygon1()
+zip_code1$id <- "ZIP Code"
+
+
+# Overlapping Area
+# Function to create a realistic polygon for Postal Code Area 1
+create_overlap_polygon <- function() {
+  coords <- matrix(c(
+    1, 0,     # Bottom-left
+    3, 0.5,    # Bottom-right
+    3, 1.5,     # Top-right
+    1, 1.5,     # Top-left
+    1, 0       # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+overlap <- create_overlap_polygon()
+overlap$id <- "Largest Areal Overlap"
+
+
+
+
+# Plot the selected municipality and postal code areas with overlap highlighted
+ggplot() +
+  geom_sf(data = municipality1, aes(fill = id), alpha = 0.5, color = "black") +
+  geom_sf(data = municipality2, aes(fill = id), alpha = 0.5, color = "black") +
+  geom_sf(data = zip_code1, aes(fill = id), alpha = 0.5, color = "blue") +
+  geom_sf(data = overlap, aes(fill = id), alpha = 0.8, color = "red") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(title = "Areal Matching: Largest Overlap",
+       fill = "Layers") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+
+```
+
+The `sf::st_join` function identifies which municipality overlaps with each zip code area. 
+The `largest = TRUE` argument indicates that if a zip code overlaps with multiple municipalities, it will only keep the municipality with the largest overlapping area.
+
 ```{r}
 
 
@@ -500,9 +617,112 @@ areal_matched <-
 
 ## Areal interpolation
 
-This method uses areal interpolation to distribute municipality inhabitants data proportionally across overlapping zip code areas.
-It estimates the inhabitants for each zip code based on the proportion of its area that overlaps with each municipality.
-For advanced users, we'd also like to refer to the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
+This method uses areal interpolation to distribute municipality inhabitants data proportionally across overlapping ZIP code areas.
+
+
+```{r, echo = FALSE}
+
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+# Function to create a realistic polygon for Municipality 1
+create_municipality_polygon1 <- function() {
+  coords <- matrix(c(
+    0, 0,     # Bottom-left
+    1, 0,
+    3, 0.5,   # Bottom-right
+    3.4, 1.5, # Middle-right
+    3, 2.5,   # Top-right
+    0.5, 2.5, # Top-left
+    0.8, 1.5, # Middle-left
+    0, 0      # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+# Create Municipality 1
+municipality1 <- create_municipality_polygon1()
+municipality1$id <- "Municipality 1"
+
+# Function to create a realistic polygon for Municipality 2
+create_municipality_polygon2 <- function() {
+  coords <- matrix(c(
+    0, 0,     # Bottom-left
+    1, 0,
+    3, 0.5,   # Bottom-right
+    3.4, 1.5, # Middle-right
+    3.4, -1,  # Bottom-right extension
+    0, 0      # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+# Create Municipality 2
+municipality2 <- create_municipality_polygon2()
+municipality2$id <- "Municipality 2"
+
+# Function to create a realistic polygon for Postal Code Area
+create_zip_code_polygon <- function() {
+  coords <- matrix(c(
+    1, -0.5,  # Bottom-left
+    3, -0.5,  # Bottom-right
+    3, 1.5,   # Top-right
+    1, 1.5,   # Top-left
+    1, -0.5   # Closing the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords)) |>
+    st_sfc(crs = 4326) |>
+    st_sf()
+}
+
+# Create Postal Code Area
+zip_code <- create_zip_code_polygon()
+zip_code$id <- "ZIP Code"
+
+
+# Create geometries for each municipality's share in the interpolation area
+interpolated_municipality1 <- st_intersection(zip_code, municipality1) # Share from Municipality 1
+interpolated_municipality1$id <- "Share from Municipality 1"
+
+interpolated_municipality2 <- st_intersection(zip_code, municipality2) # Share from Municipality 2
+interpolated_municipality2$id <- "Share from Municipality 2"
+
+# Combine the shares into a single data frame
+shares_combined <- rbind(interpolated_municipality1, interpolated_municipality2)
+
+# Plot the municipalities and their shares in the zip code area
+ggplot() +
+  geom_sf(data = municipality1, aes(fill = id), alpha = 0.5, color = "black") +
+  geom_sf(data = municipality2, aes(fill = id), alpha = 0.5, color = "black") +
+  geom_sf(data = zip_code, aes(fill = id), alpha = 0.5, color = "blue") +
+  geom_sf(data = shares_combined, aes(fill = id), alpha = 0.7, , color = "red") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(title = "Area-weighted spatial interpolation",
+       fill = "Layers") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+
+```
+
+It estimates the inhabitants for each ZIP code based on the proportion of its area that overlaps with each municipality by:
+
+1. Overlap Calculation: For each zip code area, the function determines how much of its area overlaps with each municipality, as such calculate the intersection of each unit of both areal unit layers.
+
+2. Proportional Distribution: Once the overlaps are identified, it calculates the proportion of each municipality's area that overlaps with the zip code area. 
+
+3. Population Estimation: The estimated population for each zip code area is then computed by multiplying the municipality's population by the overlap proportion. For example, if a municipality has 10,000 inhabitants and 40% of its area overlaps with a particular zip code, then 4,000 inhabitants would be allocated to that zip code area. If multiple municipalities overlap with a zip code area, it sum the estimated populations from each municipality to get the total population for that zip code.
+
+As such, a key advantage of areal interpolation is its flexibility, as it can effectively manage irregular boundaries and varying sizes of geographic units.
+Nonetheless, it operates under the assumption that populations are uniformly distributed within areas, which may not reflect reality and can lead to inaccuracies if the input data is flawed or not representative.
 
 ```{r}
 
@@ -533,6 +753,9 @@ areal_interpolation_matched <-
   dplyr::arrange(zip_code)
 
 ```
+
+
+For advanced users, we would also like to refer to the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
 
 
 # Evaluating the linking process
