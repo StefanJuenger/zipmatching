@@ -597,6 +597,12 @@ ggplot() +
 The `sf::st_join` function identifies which municipality overlaps with each zip code area. 
 The `largest = TRUE` argument indicates that if a zip code overlaps with multiple municipalities, it will only keep the municipality with the largest overlapping area.
 
+In comparison to centroid matching, areal matching takes the full geographic shape of the zip code area into account, providing a more precise association with municipalities based on actual boundaries. 
+One drawback of areal matching is that it can be computationally more intensive, especially when working with a large number of areal units. 
+Another complication is that if multiple municipalities overlap with a zip code, additional decisions must be made about which municipality to assign.
+In this application, we take a straightforward approach and assign the municipality with the largest overlap.
+However, if the overlap shares are equal, this could resemble a coin toss.
+
 ```{r}
 
 
@@ -721,8 +727,9 @@ It estimates the inhabitants for each ZIP code based on the proportion of its ar
 
 3. Population Estimation: The estimated population for each zip code area is then computed by multiplying the municipality's population by the overlap proportion. For example, if a municipality has 10,000 inhabitants and 40% of its area overlaps with a particular zip code, then 4,000 inhabitants would be allocated to that zip code area. If multiple municipalities overlap with a zip code area, it sum the estimated populations from each municipality to get the total population for that zip code.
 
-As such, a key advantage of areal interpolation is its flexibility, as it can effectively manage irregular boundaries and varying sizes of geographic units.
-Nonetheless, it operates under the assumption that populations are uniformly distributed within areas, which may not reflect reality and can lead to inaccuracies if the input data is flawed or not representative.
+As such, a key advantage of areal interpolation is its flexibility, as it can effectively manage irregular boundaries and varying sizes of geographic units. 
+Nonetheless, it operates under the assumption that populations are uniformly distributed within areas, which may not reflect reality and can lead to inaccuracies if the input data is flawed or unrepresentative.
+Similar to areal matching, the process can be computationally demanding, especially when dealing with multiple overlapping areas and variable populations, as well as a large number of indicators that need to be interpolated, which can be resource-intensive.
 
 ```{r}
 
