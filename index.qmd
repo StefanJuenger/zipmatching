@@ -35,7 +35,7 @@ Consequently, citizens may become more susceptible to far-right narratives, whic
 Therefore, one central research question is: Is living in a less densely populated area, such as a rural place, associated with far-right party preferences?
 To answer this question, it is necessary to link survey data with information about the respondents’ living environment.
 
-The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g. overlapping geospatial units that do not share a common border(Qiu, Zhang, and Zhou 2012)https://bookdown.org/robinlovelace/geocompr/spatial-operations.html#ref-qiu_development_2012.
+The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g. overlapping geospatial units that do not share a common border.
 In many (online) surveys, respondents can indicate where they live by, for example, entering the ZIP code of their home address. 
 This information allows for the linking of contextual information about the respondents’ living environment, like population density, to the survey data. 
 However, contextual information is often not available at the ZIP code level.
@@ -114,9 +114,9 @@ This tool addresses this challenge by highlighting linking techniques that can b
 
 To replicate this tool, researchers need the following:
 
-- Survey data that includes an identifier for the target areal units where respondents reside and which they wish to match
+- Survey data that includes an identifier for the target areal units where respondents reside and for which the attribute needs to be linked or estimated
 - The geometries of the target areal units 
-- The geometries of the areal units that include the context information they are interested in
+- The geometries of the source unit that include the attributes information they are interested in
 
 For this tool application, we rely on three data sources: (synthetic) survey data including self-reported ZIP codes, the geographies of German ZIP code areas, and the geographies of German municipalities, including attributes of interest, in this case population density.
 
@@ -313,7 +313,7 @@ If you want to create a complete matching list between all zip codes and all mun
 
 # Matching methods
 
-## Simulate respondents' place of living
+## Data praperation  {#sec-simpoints}
 
 We're sampling 1,000 points within each valid zip code area to later assess the accuracy of our linking techniques. 
 By simulating 1,000 hypothetical living locations for respondents who reported living in a specific zip code area, we can evaluate whether our method accurately aligns each sampled point with the correct municipality.
@@ -465,9 +465,9 @@ map1 <- ggplot() +
 
 # Plot for municipality2
 map2 <- ggplot() +
-  geom_sf(data = municipality2, aes(fill = factor("Municipality", levels = desired_order)), alpha = 0.75, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Fake Zip Codes", levels = desired_order)), alpha = 0.5, color = "black") +
-  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order)), shape = 20, color = "red", size = 3) +
+  geom_sf(data = municipality2, aes(fill = factor("Municipality", levels = desired_order1)), alpha = 0.75, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("Fake Zip Codes", levels = desired_order1)), alpha = 0.5, color = "black") +
+  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "red", size = 3) +
   scale_fill_manual(values = color_mapping1, name = "Layers") +
   labs(title = "Low Accuracy") +
   theme_minimal() +
@@ -771,7 +771,7 @@ It estimates the inhabitants for each ZIP code based on the proportion of its ar
 
 As such, a key advantage of areal interpolation is its flexibility, as it can effectively manage irregular boundaries and varying sizes of geographic units. 
 Nonetheless, it operates under the assumption that populations are uniformly distributed within areas, which may not reflect reality and can lead to inaccuracies if the input data is flawed or unrepresentative.
-Similar to areal matching, the process can be computationally demanding, especially when dealing with multiple overlapping areas and variable populations, as well as a large number of indicators that need to be interpolated, which can be resource-intensive.
+Similar to areal matching, the process can be computationally demanding, especially when dealing with multiple overlapping areas and variable populations, as well as a large number of indicators that need to be interpolated.
 
 ```{r}
 
@@ -803,15 +803,23 @@ areal_interpolation_matched <-
 
 ```
 
+For advanced users, we would also like to point out the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
 
-For advanced users, we would also like to refer to the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
+# Assessing the matching methods
 
+<!-- exchange for population density? -->
 
-# Evaluating the linking process
+## Data preparation
 
-## Calculate the differences between real and estimated inhabitants
+In @sec-simpoints, we sampled nearly 1,000,000 points to simulate 1,000 hypothetical living locations within each ZIP code area. 
+This allows us to assess the accuracy and consistency of the linking process and compare the three matching methods. 
+The step is crucial because, for each simulated point, we know the exact municipality match, which provides the correct value for the number of inhabitants in the respondents' municipality.
 
-This section calculates how much the estimated number of inhabitants differs from the actual number of inhabitants for each method: Centroid Matching, Areal Matching, and Areal Interpolation Matching.
+It is important to note that we focus on the differences in the number of inhabitants per municipality to evaluate the matching process because that is our main variable of interest.
+Specifically, if a ZIP code area overlaps with spatial clusters of municipalities that have a similar number of inhabitants - areas with high positive spatial autocorrelation - the differences will naturally be smaller, even if the matching methods yield different results.
+Therefore, the evaluation of the linking process — and ultimately the selection of the most appropriate method — should consider the main variable(s) of interest 
+
+Let's calculate for each point location the difference between real and estimated number of inhabitants for each matching method (centroid matching, area matching and area-weighted interpolation) and combine the differences calculated for each method.
 
 ```{r}
 
@@ -871,14 +879,7 @@ diff_real_areal_interpolation <-
   ) |>
   # Ensure unique rows to avoid duplication
   dplyr::distinct()
-```
 
-
-## Combine all differences into one data frame for analysis 
-
-This section combines the differences calculated for each method (Centroid, Areal, Areal Interpolation) and performs summary statistics to evaluate accuracy and consistency of each method.
-
-```{r}
 differences <-
   # Combine rows from all difference data frames into one
   dplyr::bind_rows(
@@ -960,8 +961,8 @@ diff_areal_interpolated <-
 
 ```
 
-## Aggregate at the Zip Code level
-This process calculates the mean difference for each matching method (Centroid, Areal, Areal Interpolation) by zip code, and then determines the method with the smallest absolute mean difference per zip code.
+Since we are ultimately interested in how the matching compares at the ZIP code level, rather than at the (simulated) point level, we aggregate the population estimate differences at the ZIP code level. 
+This process allows us to compare the results of the three different matching methods (centroid matching, areal matching, and areal interpolation matching) and identify which method produces the smallest population difference for each ZIP code.
 
 ```{r}
 
@@ -1067,8 +1068,9 @@ diff_real_zip_code_aggregated <-
   )
 ```
 
+## Accuracy of matching methods
 
-## Visualization
+- Differences to the 'real' number of inhabitants on average the same between the matching methods
 
 ```{r}
 
@@ -1098,6 +1100,13 @@ difference_histogram <-
 difference_histogram
 
 ```
+
+## Consistency of matching methods
+
+- Comparison of scaled differences between matching methods
+- Narrower, centered distributions suggest better consistency across the matched points.
+- Wider, more spread-out distributions suggest more variability in the differences, meaning some methods might be more volatile or less accurate in specific areas.
+- 
 
 ```{r}
 
@@ -1129,17 +1138,107 @@ difference_densities
 
 ```
 
+This map allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.
+
+Different matching methods perform better in certain areas. For example, in more populated regions like cities, ZIP codes are usually clearly located within a single municipality, so centroid matching performs very well. 
+On average, areal interpolation, which takes more factors into account, performs the best across the entire area. However, this method requires the variable of interest for the matching process which might not always be available.
+All in all: Different matching methods perform better in some places.
+
+```{r}
 
 
-## Correlation on individual level 
+# Create a map to visualize which method minimizes the difference for each zip code ----
+diff_real_zip_code_aggregated_map <-
+  # Initialize ggplot for map
+  ggplot() +
+  # Add map layers with fill representing the best matching method
+  geom_sf(
+    data = diff_real_zip_code_aggregated, aes(fill = min_method), lwd = 0
+  ) +
+  # Use viridis color scale to differentiate methods
+  scale_fill_viridis_d()
+
+# Save the map plot to a file ----
+ggplot2::ggsave(
+  # Specify file name and output path
+  "./test/diff_real_zip_code_aggregated_map.png",
+  # Reference the map plot
+  diff_real_zip_code_aggregated_map,
+  # High resolution for clear saved image
+  dpi = 600
+)
+
+diff_real_zip_code_aggregated_map_differences <-
+  # Initialize ggplot for map
+  ggplot() +
+  geom_sf(data = zip_codes, lwd = .01) +
+  # Add map layers with fill representing the difference
+  geom_sf(
+    data = diff_real_zip_code_aggregated, aes(fill = difference), lwd = 0
+  ) +
+  # Use viridis color scale to differentiate differences
+  scale_fill_viridis_c() +
+  facet_wrap(~min_method)
+
+
+```
+
+## Effect of matching method on bivariate correlation  
+
+Nearly no difference
+
+```{r, echo = FALSE}
+
+# linked_survey <-
+#   survey |> 
+#   # Left join with centroid_matched, dropping geometry information
+#   dplyr::left_join(centroid_matched |> 
+#                      sf::st_drop_geometry(), by = "zip_code") |>
+#   # Rename columns for clarity
+#   dplyr::rename(cent_inhabitants_mun = inhabitants_municipality,
+#                 cent_area_mun = mun_area) |>
+#   # Left join with areal_matched, dropping specific columns and geometry
+#   dplyr::left_join(areal_matched |>
+#                      sf::st_drop_geometry() |>
+#                      dplyr::select(-inhabitants_zip_code), by = "zip_code") |>
+#   # Rename columns for clarity
+#   dplyr::rename(areal_inhabitants_mun = inhabitants_municipality,
+#                 areal_area_mun = mun_area) |>
+#   # Left join with areal_interpolation_matched, dropping specific columns and geometry
+#   dplyr::left_join(areal_interpolation_matched |>
+#                      sf::st_drop_geometry() |>
+#                      dplyr::select(-inhabitants_zip_code), by = "zip_code") |>
+#   # Rename columns for clarity
+#   dplyr::rename(interpolation_inhabitants_mun = inhabitants_municipality,
+#                 interpolation_area_mun = mun_area)  |>
+#   # Calculate population densities based on the joined data
+#   dplyr::mutate(
+#     cent_pop_dens = cent_inhabitants_mun / cent_area_mun,
+#     areal_pop_dens = areal_inhabitants_mun / areal_area_mun,
+#     interpolation_pop_dens = interpolation_inhabitants_mun / interpolation_area_mun
+#   )
+# 
+# # Calculate correlations between afd_rating and population density variables
+# correlations <-
+#   linked_survey |> 
+#   # Select relevant columns: afd_rating and those containing "pop_dens"
+#   dplyr::select(afd_rating, contains("pop_dens")) |>
+#   # Compute pairwise correlations while handling missing values
+#   corrr::correlate(use = "pairwise.complete.obs")  |>  
+#   # Select only the terms and their correlation with afd_rating
+#   dplyr::select(term, afd_rating) |> 
+#   # Filter out the correlation of afd_rating with itself
+#   dplyr::filter(term != "afd_rating")
+
+```
 
 # Conclusion and recommendations for further analyses
+
+- Short summary
+- Recommendation
+- Short theoretical discussion about neighbourhood definition (uncertain geographic unit problem)
 
 # References
 
 # Additional material
-
-## Documentation
-
-## Code Examples
 
