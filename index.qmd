@@ -108,17 +108,17 @@ viridis_colors <- viridis::viridis(5)
 # Create a named vector for fill colors
 color_mapping <- c(
   "Municipality 1" = viridis_colors[1],       # Color for Municipality
-  "Zip Code" = viridis_colors[3]      # Color for Fake Zip Codes
+  "ZIP Code" = viridis_colors[3]      # Color for Fake ZIP Codes
 )
 
 # Set desired legend order
-desired_order <- c("Municipality 1", "Zip Code")
+desired_order <- c("Municipality 1", "ZIP Code")
 
 # Plot the selected municipality and postal code areas with overlap highlighted
 
 ggplot() +
   geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order)), alpha = 0.8, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order)), alpha = 0.8, color = "black") +
  
   scale_fill_manual(values = color_mapping, name = "Layers") +
   labs(title = "Overlapping But Incongruent Boundaries",
@@ -166,7 +166,7 @@ This tool application provides replicable code to guide the user through the lin
 
 - Areal matching: This method matches entire areas to one another, such as linking ZIP code areas to municipalities based on the largest overlapping area.
 
-- Areal interpolation: This technique redistributes data from one set of geographic units to another. The basic approach, area weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap. 
+- Areal interpolation: This technique redistributes data from one set of geographic units to another. The basic approach, area-weighted spatial interpolation, takes into account the size of the areal overlap and assigns the value of the overlapping area in proportion to the overlap. 
 
 - Overall Assessment of Linking Techniques: Evaluates the differences, effectiveness, and accuracy of the different linking techniques to determine the best method for integrating the survey and geospatial data at hand.
 
@@ -194,21 +194,21 @@ library(tibble)      # For creating and managing tibbles (data frames)
 
 ## Geospatial Data
 
-In Germany, the 5-character zip code areas often do not align with municipal boundaries, leading to both overlap and incongruence. This mismatch can be more pronounced in rural areas, where larger zip code regions may encompass multiple small municipalities. In contrast, urban areas tend to have several distinct zip codes that fall within a single municipality. For example, the capital Berlin, as a German 'city-state', is one municipality with 190 zip codes.
+In Germany, the 5-character ZIP code areas often do not align with municipal boundaries, leading to both overlap and incongruence. This mismatch can be more pronounced in rural areas, where larger ZIP code regions may encompass multiple small municipalities. In contrast, urban areas tend to have several distinct ZIP codes that fall within a single municipality. For example, the capital Berlin, as a German 'city-state', is one municipality with 190 ZIP codes.
 
 When selecting and loading the geospatial data, we always check for three sources of errors:
 - Consistent (projected) coordinate reference systems. In our case, both shapefiles are projected in WGS 84 (EPSG: 3857).
-- Timeliness of administrative boundaries and territorial reforms. For example, we use the 2022 municipality boundaries and the 2023 zip code areas.
-- Existence, column names, and format of identifiers and variables of interest. For instance, we require the zip code and municipality code to be in character format in our data frame.
+- Timeliness of administrative boundaries and territorial reforms. For example, we use the 2022 municipality boundaries and the 2023 ZIP code areas.
+- Existence, column names, and format of identifiers and variables of interest. For instance, we require the ZIP code and municipality code to be in character format in our data frame.
 
 ```{r}
 
-# Load zip code data ----
+# Load ZIP code data ----
 
 zip_codes <-
   # Load spatial data from GeoPackage file
   sf::st_read("./data-raw/PLZ_Gebiete_7155512659375659703.gpkg") |>
-  # Select only relevant columns: zip code and population
+  # Select only relevant columns: ZIP code and population
   dplyr::select(zip_code = plz, inhabitants_zip_code = einwohner)
 
 # Load municipality data ----
@@ -233,11 +233,11 @@ g_mun <- ggplot(data = municipalities) +
   ggplot2::ggtitle("Municipalities") +
   ggplot2::theme_minimal() 
 
-# Create the zip codes plot
+# Create the ZIP codes plot
 g_zip <- ggplot() +
   ggplot2::geom_sf(data = zip_codes, fill = "lightgrey", color = "black", size = 0.05) + 
 # ggplot2::geom_sf(data = zip_codes_reduced, fill = "red", color = "black") +
-  ggplot2::ggtitle("Zip Codes") +
+  ggplot2::ggtitle("ZIP Codes") +
   ggplot2::theme_minimal() 
 
 # Combine the two plots using patchwork
@@ -251,7 +251,7 @@ g_mun + g_zip
 ## Survey Data
 
 Due to data protection regulations, we cannot use real-world survey data, but we base our tool application on simulated data that were created on  the basis of the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
-To prepare the simulated data, we clean the original survey data to retain only valid zip codes and then link the data with geospatial data using centroid and areal matching techniques, followed by area-weighted interpolation for population and area estimates. 
+To prepare the simulated data, we clean the original survey data to retain only valid ZIP codes and then link the data with geospatial data using centroid and areal matching techniques, followed by area-weighted interpolation for population and area estimates. 
 Finally, we calculate correlations between the variable of interest, "afd_rating" and from the geospatial data derived population densities.
 In a next step, we generate random ZIP codes, introducing some invalid entries to mimic the real-world data.
 We repeat the linking process and then simulate the dependent variable based on the original correlations to derive the simulated data.
@@ -266,28 +266,28 @@ survey <- readRDS("./data-raw/simulated_survey_data.rds")
 
 #  Inspecting data
 
-Before linking survey data, it is crucial to inspect the zip codes provided by respondents, especially when  participants entered their zip codes independently.
-The self-reported nature of data entry can lead to several issues, like refusal to respond or typographical errors, which can result in invalid or missing zip codes. 
-The provided code categorizes the self-reported zip codes into three statuses: "Non Response", "Invalid ZIP Code" (For instance, zip codes that are not five characters long or that do not exist in the predefined list of valid zip codes), and "Valid". 
+Before linking survey data, it is crucial to inspect the ZIP codes provided by respondents, especially when  participants entered their ZIP codes independently.
+The self-reported nature of data entry can lead to several issues, like refusal to respond or typographical errors, which can result in invalid or missing ZIP codes. 
+The provided code categorizes the self-reported ZIP codes into three statuses: "Non Response", "Invalid ZIP Code" (For instance, ZIP codes that are not five characters long or that do not exist in the predefined list of valid ZIP codes), and "Valid". 
 By utilizing this categorization, researchers can identify and address potential data quality issues before data integration.
-<!--- footnote: could also try to resolve issues with zip codes -->
+<!--- footnote: could also try to resolve issues with ZIP codes -->
 
 ```{r}
 
-# Create a new column 'status' to categorize the zip codes
+# Create a new column 'status' to categorize the ZIP codes
 survey <- survey |>
   dplyr::mutate(
-    # Use case_when to classify each zip_code into different statuses
+    # Use case_when to classify each ZIP_code into different statuses
     status = dplyr::case_when(
       # Condition 1: If zip_code is NA, classify as "1 Non Response"
       is.na(zip_code) ~ "1 Non Response",
       # Condition 2: If zip_code does not have exactly 5 characters, 
       # classify as "2 Invalid ZIP Code"
       nchar(zip_code) != 5 ~ "2 Invalid ZIP Code",
-      # Condition 3: If zip_code is not found in the list of valid zip codes, 
+      # Condition 3: If zip_code is not found in the list of valid ZIP codes, 
       # classify as "2 Invalid ZIP Code"
       !zip_code %in% zip_codes$zip_code ~ "2 Invalid ZIP Code",
-      # Condition 4: If zip_code is found in the list of valid zip codes, 
+      # Condition 4: If zip_code is found in the list of valid ZIP codes, 
       # classify as "3 Valid"
       zip_code %in% zip_codes$zip_code ~ "3 Valid"
     )
@@ -309,16 +309,16 @@ print(summary_table)
 
 ```
 
-In this case, `r summary_table$freq[summary_table$status == "1 Non Response"]`% of respondents did not answer the zip code question, and `r summary_table$freq[summary_table$status == "2 Invalid ZIP Code"]`% provided an invalid zip code. What we do not check here is whether respondents entered their correct zip code. Depending on the data at hand, it might be possible to verify whether other self-reported data, such as the federal state, or data from other sources align with this information.
+In this case, `r summary_table$freq[summary_table$status == "1 Non Response"]`% of respondents did not answer the ZIP code question, and `r summary_table$freq[summary_table$status == "2 Invalid ZIP Code"]`% provided an invalid ZIP code. What we do not check here is whether respondents entered their correct ZIP code. Depending on the data at hand, it might be possible to verify whether other self-reported data, such as the federal state, or data from other sources align with this information.
 
-For the ongoing linking process, we exclude all observations that did not enter a zip code or entered an invalid one, working instead with a subsample of all valid zip codes in the survey. Since we will use more spatial techniques in the following analysis, we rely on this reduced spatial data frame.
+For the ongoing linking process, we exclude all observations that did not enter a ZIP code or entered an invalid one, working instead with a subsample of all valid ZIP codes in the survey. Since we will use more spatial techniques in the following analysis, we rely on this reduced spatial data frame.
 
 ```{r}
 
-# Create a reduced dataset based on the valid zip codes from the survey data
+# Create a reduced dataset based on the valid ZIP codes from the survey data
 zip_codes_valid <-
   survey |>
-  # Filter the survey data to include only rows with a valid zip code status
+  # Filter the survey data to include only rows with a valid ZIP code status
   dplyr::filter(status == "3 Valid") |>
   # Perform a left join with the zip_codes dataset on the 'zip_code' column
   dplyr::left_join(zip_codes, ., by = "zip_code") |>
@@ -328,7 +328,7 @@ zip_codes_valid <-
 ```
 
 ::: {.callout-important} 
-If you want to create a complete matching list between all zip codes and all municipalities in Germany, you can also use the complete zip code data set. However, it might take a while to create this data set and run the spatial joins. <!-- The script and data are provided under additional material -->
+If you want to create a complete matching list between all ZIP codes and all municipalities in Germany, you can also use the complete ZIP code data set. However, it might take a while to create this data set and run the spatial joins. <!-- The script and data are provided under additional material -->
 :::
 
 
@@ -336,14 +336,14 @@ If you want to create a complete matching list between all zip codes and all mun
 
 ## Data praperation  {#sec-simpoints}
 
-We're sampling 1,000 points within each valid zip code area to later assess the accuracy of our linking techniques. 
-By simulating 1,000 hypothetical living locations for respondents who reported living in a specific zip code area, we can evaluate whether our method accurately aligns each sampled point with the correct municipality.
+We're sampling 1,000 points within each valid ZIP code area to later assess the accuracy of our linking techniques. 
+By simulating 1,000 hypothetical living locations for respondents who reported living in a specific ZIP code area, we can evaluate whether our method accurately aligns each sampled point with the correct municipality.
 This approach allows us to identify any discrepancies or inaccuracies in the linking process and compare the three linking methods.
 
 ```{r}
 
-# Sample points within zip code areas ----
-# Randomly sample points within each zip code area. Note: This can take a long
+# Sample points within ZIP code areas ----
+# Randomly sample points within each ZIP code area. Note: This can take a long
 # time due to the number of points sampled.
 points_in_zip_codes <-
   zip_codes_valid |>
@@ -351,13 +351,13 @@ points_in_zip_codes <-
   sf::st_sample(size = c(1000, 1000), progress = TRUE, exact = FALSE) |>
   # Convert sampled points to an sf object
   sf::st_as_sf() |>
-  # Spatially join sampled points with zip code data
+  # Spatially join sampled points with ZIP code data
   sf::st_join(zip_codes) |>
-  # Arrange points by zip code for easier viewing
+  # Arrange points by ZIP code for easier viewing
   dplyr::arrange(zip_code) |>
   # Assign unique IDs to each sampled point
   dplyr::mutate(id = 1:dplyr::n()) |>
-  # Select only the ID and zip code columns
+  # Select only the ID and ZIP code columns
   dplyr::select(id, zip_code)
 
 
@@ -377,8 +377,8 @@ points_with_real_inhabitants_municipality <-
 
 ## Centroid matching
 
-This method uses the centroid (center point) of each zip code area to find the corresponding municipality.
-It assumes that the center point accurately represents the zip code's location in terms of municipality boundaries.
+This method uses the centroid (center point) of each ZIP code area to find the corresponding municipality.
+It assumes that the center point accurately represents the ZIP code's location in terms of municipality boundaries.
 
 ```{r, echo = F}
 
@@ -431,7 +431,7 @@ fake_zip_codes <- zip_code1
 fake_zip_codes_centroid <- sf::st_centroid(fake_zip_codes)
 
 
-# Add centroids to zip code data
+# Add centroids to ZIP code data
 
 
 # Function to create a realistic polygon for Municipality 1
@@ -467,17 +467,17 @@ viridis_colors <- viridis::viridis(5)
 # Create a named vector for fill colors
 color_mapping1 <- c(
   "Municipality 1" = viridis_colors[1],       # Color for Municipality
-  "Zip Code" = viridis_colors[3],      # Color for Fake Zip Codes
+  "ZIP Code" = viridis_colors[3],      # Color for Fake ZIP Codes
   "Centroid" = "black"                         # Color for Centroid
 )
 
 # Set desired legend order
-desired_order1 <- c("Municipality 1", "Zip Code", "Centroid")
+desired_order1 <- c("Municipality 1", "ZIP Code", "Centroid")
 
 # Plot for municipality1
 map1 <- ggplot() +
   geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
   geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
   scale_fill_manual(values = color_mapping1, name = "Layers") +
   labs(title = "High Accuracy") +
@@ -487,29 +487,36 @@ map1 <- ggplot() +
 # Plot for municipality2
 map2 <- ggplot() +
   geom_sf(data = municipality2, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
   geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
   scale_fill_manual(values = color_mapping1, name = "Layers") +
   labs(title = "Low Accuracy") +
   theme_minimal() +
-  theme(legend.position = "right")
+  theme(legend.position = "right") 
 
 # Combine the two plots using patchwork
-(map1 | map2) + plot_layout(guides = "collect") +
+(map1 | map2) + plot_layout(guides = "collect", ncol = 2) +
   plot_annotation(title = "Accuracy of Centroid Linking")
+
+centroid_map <- (map1 | map2) + plot_layout(guides = "collect") +
+  plot_annotation(title = "Accuracy of Centroid Linking")
+ 
+ggsave("./test/centroid_map.png", centroid_map, dpi = 300, width = 8, height = 6, units = "in")
 
 ```
 
+![TestAbbildung](./test/centroid_map.png)
+
 One benefit of this approach is its simplicity and efficiency, allowing for a quick linking process. 
-However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the zip code area, nor does it account for the actual overlap or shape of the units.
-To do the linking process, we need to calculate centroids for each zip code and use the `sf::st_join` function to identify in which municipality each centroid is located.
+However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the ZIP code area, nor does it account for the actual overlap or shape of the units.
+To do the linking process, we need to calculate centroids for each ZIP code and use the `sf::st_join` function to identify in which municipality each centroid is located.
 
 ```{r}
 
 # Centroid linking ----
 centroid_matched <-
   zip_codes_valid |>
-  # Calculate the centroid for each zip code area
+  # Calculate the centroid for each ZIP code area
   sf::st_point_on_surface() |>
   # Spatially join centroids with municipality data
   sf::st_join(municipalities) |>
@@ -517,14 +524,14 @@ centroid_matched <-
   dplyr::select(zip_code, inhabitants_zip_code, inhabitants_municipality) |>
   # Remove any duplicate rows
   dplyr::distinct() |>
-  # Arrange by zip code for easy viewing
+  # Arrange by ZIP code for easy viewing
   dplyr::arrange(zip_code)
 
 ```
 
 ## Areal matching
 
-This method assigns each zip code area to the municipality in which the  majority of its area lies.
+This method assigns each ZIP code area to the municipality in which the  majority of its area lies.
 
 ```{r, echo = FALSE}
 
@@ -594,11 +601,11 @@ zip_code1$id <- "ZIP Code"
 # Function to create a realistic polygon for Postal Code Area 1
 create_overlap_polygon <- function() {
   coords <- matrix(c(
-    1.02, 0.02,     # Bottom-left
-    2.98, 0.52,    # Bottom-right
-    2.98, 1.48,     # Top-right
-    1.02, 1.48,     # Top-left
-    1.02, 0.02       # Closing the polygon
+    1, 0,     # Bottom-left
+    3, 0.5,    # Bottom-right
+    3, 1.5,     # Top-right
+    1, 1.5,     # Top-left
+    1, 0       # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
   st_polygon(list(coords)) |>
@@ -619,19 +626,23 @@ overlap$id <- "Largest Areal Overlap"
 color_mapping2 <- c(
   "Municipality 1" = viridis_colors[1],  # Color for Municipality 1
   "Municipality 2" = viridis_colors[2],  # Color for Municipality 2
-  "Zip Code" = viridis_colors[3],        # Color for Zip Code
+  "ZIP Code" = viridis_colors[3],        # Color for ZIP Code
   "Overlap" = viridis_colors[4]          # Color for Overlap
 )
 
 # Set desired legend order
-desired_order2 <- c("Municipality 1", "Municipality 2", "Zip Code", "Overlap")
+desired_order2 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Overlap")
+
+library(ggpattern)
+
 
 # Create a plot
 ggplot() +
   geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 1
   geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code1, aes(fill = factor("Zip Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for Zip Code
-  geom_sf(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), alpha = 0.8, color = "black", size = 1.5) +  # Color for Overlap
+  geom_sf(data = zip_code1, aes(fill = factor("ZIP Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for ZIP Code
+   geom_sf_pattern(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), 
+                  pattern = "stripe", pattern_fill = "black", pattern_spacing = 0.02, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Closer stripe pattern for Overlap
   scale_fill_manual(values = color_mapping2, 
                     name = "Layers") +  # Use the named vector for specific colors
   labs(title = "Areal Matching: Largest Overlap") +
@@ -640,12 +651,12 @@ ggplot() +
 
 ```
 
-The `sf::st_join` function identifies which municipality overlaps with each zip code area. 
-The `largest = TRUE` argument indicates that if a zip code overlaps with multiple municipalities, it will only keep the municipality with the largest overlapping area.
+The `sf::st_join` function identifies which municipality overlaps with each ZIP code area. 
+The `largest = TRUE` argument indicates that if a ZIP code overlaps with multiple municipalities, it will only keep the municipality with the largest overlapping area.
 
-In comparison to centroid matching, areal matching takes the full geographic shape of the zip code area into account, providing a more precise association with municipalities based on actual boundaries. 
+In comparison to centroid matching, areal matching takes the full geographic shape of the ZIP code area into account, providing a more precise association with municipalities based on actual boundaries. 
 One drawback of areal matching is that it can be computationally more intensive, especially when working with a large number of areal units. 
-Another complication is that if multiple municipalities overlap with a zip code, additional decisions must be made about which municipality to assign.
+Another complication is that if multiple municipalities overlap with a ZIP code, additional decisions must be made about which municipality to assign.
 In this application, we take a straightforward approach and assign the municipality with the largest overlap.
 However, if the overlap shares are equal, this could resemble a coin toss.
 
@@ -656,13 +667,13 @@ However, if the overlap shares are equal, this could resemble a coin toss.
 
 areal_matched <-
   zip_codes_valid |>
-  # Spatial join using the largest overlap municipality for each zip code area
+  # Spatial join using the largest overlap municipality for each ZIP code area
   sf::st_join(municipalities, left = TRUE, largest = TRUE) |>
   # Select relevant columns
   dplyr::select(zip_code, inhabitants_zip_code, inhabitants_municipality) |>
-  # Remove duplicates to ensure each zip code matches one municipality
+  # Remove duplicates to ensure each ZIP code matches one municipality
   dplyr::distinct() |>
-  # Sort by zip code
+  # Sort by ZIP code
   dplyr::arrange(zip_code)
 
 ```
@@ -758,42 +769,43 @@ inferno_colors <- viridis::inferno(5)  # Generate 5 colors to use for distinct l
 color_mapping3 <- c(
   "Municipality 1" = viridis_colors[1],     # Color for Municipality 1
   "Municipality 2" = viridis_colors[2],     # Color for Municipality 2
-  "Zip Code" = viridis_colors[3],           # Color for Zip Code
+  "ZIP Code" = viridis_colors[3],           # Color for ZIP Code
   "Shares Municipality 1" = viridis_colors[4],  # Color for Shares of Municipality 1
   "Shares Municipality 2" = viridis_colors[5]   # Color for Shares of Municipality 2
 )
 
 # Set desired legend order
-desired_order3 <- c("Municipality 1", "Municipality 2", "Zip Code", "Shares Municipality 1", "Shares Municipality 2")
+desired_order3 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Shares Municipality 1", "Shares Municipality 2")
 
-library(ggpattern)
 
 
 # Create the plot
 
 ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), alpha = 0.3, color = "black") +  # Color for Municipality 1
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), alpha = 0.3, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code, aes(fill = factor("Zip Code", levels = desired_order3)), alpha = 0.7, color = "black") +      # Color for Zip Code
-  geom_sf(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), alpha = 0.9, color = "black") +  # Shares for Municipality 1
-  geom_sf(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), alpha = 0.9, color = "black") +  # Shares for Municipality 2
+  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), 
+          alpha = 0.3, color = "black") +  # Color for Municipality 1
+  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), 
+          alpha = 0.3, color = "black") +  # Color for Municipality 2
+  geom_sf(data = zip_code, aes(fill = factor("ZIP Code", levels = desired_order3)), 
+          alpha = 0.7, color = "black") +  # Color for ZIP Code
+  geom_sf_pattern(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), 
+                  pattern = "stripe", pattern_fill = "black", pattern_spacing = 0.02, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Closer stripe pattern for Shares Municipality 1
+  geom_sf_pattern(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), 
+                  pattern = "circle", pattern_fill = "grey", pattern_spacing = 0.05, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Adjusted spacing for Shares Municipality 2
   scale_fill_manual(values = color_mapping3, 
-                    name = "Layers") +  # Use the named vector for specific colors
-  labs(title = "Area-weighted Spatial Interpolation") +
-  theme_minimal() +
-  theme(legend.position = "right")
-
+                    name = "Layers") +
+  theme_minimal()
 
 
 ```
 
 It estimates the inhabitants for each ZIP code based on the proportion of its area that overlaps with each municipality by:
 
-1. Overlap Calculation: For each zip code area, the function determines how much of its area overlaps with each municipality and, as such, calculates the intersection of each unit of both areal unit layers.
+1. Overlap Calculation: For each ZIP code area, the function determines how much of its area overlaps with each municipality and, as such, calculates the intersection of each unit of both areal unit layers.
 
-2. Proportional Distribution: Once the overlaps are identified, it calculates the proportion of each municipality's area that overlaps with the zip code area. 
+2. Proportional Distribution: Once the overlaps are identified, it calculates the proportion of each municipality's area that overlaps with the ZIP code area. 
 
-3. Population Estimation: The estimated population for each zip code area is then computed by multiplying the municipality's population by the overlap proportion. For example, if a municipality has 10,000 inhabitants and 40% of its area overlaps with a particular zip code, then 4,000 inhabitants would be allocated to that zip code area. If multiple municipalities overlap with a zip code area, it sums the estimated populations from each municipality to get the total population for that zip code.
+3. Population Estimation: The estimated population for each ZIP code area is then computed by multiplying the municipality's population by the overlap proportion. For example, if a municipality has 10,000 inhabitants and 40% of its area overlaps with a particular ZIP code, then 4,000 inhabitants would be allocated to that ZIP code area. If multiple municipalities overlap with a ZIP code area, it sums the estimated populations from each municipality to get the total population for that ZIP code.
 
 As such, a key advantage of areal interpolation is its flexibility, as it can effectively manage irregular boundaries and varying sizes of geographic units. 
 Nonetheless, it operates under the assumption that populations are uniformly distributed within areas, which may not reflect reality and can lead to inaccuracies if the input data is flawed or unrepresentative.
@@ -807,29 +819,29 @@ areal_interpolation_matched <-
   sf::st_interpolate_aw(
     # Use municipality inhabitants data for interpolation
     municipalities["inhabitants_municipality"],
-    # Target zip code areas for the interpolation
+    # Target ZIP code areas for the interpolation
     zip_codes_valid,
     # Set to FALSE as population data is not "extensive" (not purely additive)
     extensive = FALSE
   ) |>
-  # Combine interpolated results with original zip code data
+  # Combine interpolated results with original ZIP code data
   dplyr::bind_cols(
     zip_codes_valid |>
       # Drop geometry to avoid duplication issues in final output
       sf::st_drop_geometry() |>
-      # Select only zip code and its inhabitants count
+      # Select only ZIP code and its inhabitants count
       dplyr::select(zip_code, inhabitants_zip_code)
   ) |>
   # Choose relevant columns for output
   dplyr::select(zip_code, inhabitants_zip_code, inhabitants_municipality) |>
   # Ensure unique rows
   dplyr::distinct() |>
-  # Sort by zip code
+  # Sort by ZIP code
   dplyr::arrange(zip_code)
 
 ```
 
-For advanced users, we would also like to point out the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area weighted interpolations [@Prener].
+For advanced users, we would also like to point out the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area-weighted interpolations [@Prener].
 
 # Assessing the matching methods
 
@@ -843,7 +855,7 @@ The step is crucial because, for each simulated point, we know the exact municip
 
 It is important to note that we focus on the differences in the number of inhabitants per municipality to evaluate the matching process because that is our main variable of interest.
 Specifically, if a ZIP code area overlaps with spatial clusters of municipalities that have a similar number of inhabitants - areas with high positive spatial autocorrelation - the differences will naturally be smaller, even if the matching methods yield different results.
-Therefore, the evaluation of the linking process — and ultimately the selection of the most appropriate method — should consider the main variable(s) of interest 
+Therefore, the evaluation of the linking process — and ultimately the selection of the most appropriate method — should consider the main variable(s) of interest. 
 
 Let's calculate for each point location the difference between real and estimated number of inhabitants for each matching method (centroid matching, area matching and area-weighted interpolation) and combine the differences calculated for each method.
 
@@ -992,11 +1004,11 @@ This process allows us to compare the results of the three different matching me
 
 ```{r}
 
-# Aggregate differences at the zip code level ----
+# Aggregate differences at the ZIP code level ----
 
 diff_real_zip_code_aggregated <-
   diff_real_centroid |>
-  # Group data by zip code
+  # Group data by ZIP code
   dplyr::group_by(zip_code) |>
   # Drop geometry for non-spatial operations
   sf::st_drop_geometry() |>
@@ -1040,7 +1052,7 @@ diff_real_zip_code_aggregated <-
       abs(mean_difference_areal_interpolation)
   )
 
-# Identify the method with the smallest absolute difference per zip code ----
+# Identify the method with the smallest absolute difference per ZIP code ----
 diff_real_zip_code_aggregated <-
   diff_real_zip_code_aggregated |>
   # Use bind_cols to add the method with minimum difference
@@ -1065,10 +1077,10 @@ diff_real_zip_code_aggregated <-
   # Remove intermediate absolute difference columns
   dplyr::select(-contains("abs"))
 
-# Join with zip code geometry and assign codes for each method ----
+# Join with ZIP code geometry and assign codes for each method ----
 diff_real_zip_code_aggregated <-
   diff_real_zip_code_aggregated |>
-  # Join back with zip code spatial data
+  # Join back with ZIP code spatial data
   dplyr::left_join(zip_codes) |>
   # Convert back to an sf object for spatial analysis
   sf::st_as_sf() |>
@@ -1167,13 +1179,13 @@ difference_densities
 This map allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.
 
 Different matching methods perform better in certain areas. For example, in more populated regions like cities, ZIP codes are usually clearly located within a single municipality, so centroid matching performs very well. 
-On average, areal interpolation, which takes more factors into account, performs the best across the entire area. However, this method requires the variable of interest for the matching process which might not always be available.
-All in all: Different matching methods perform better in some places.
+On average, areal interpolation, which takes more factors into account, performs the best across the entire area. However, this method requires the variable of interest for the matching process, which might not always be available.
+All in all, different matching methods perform better in some places.
 
 ```{r}
 
 
-# Create a map to visualize which method minimizes the difference for each zip code ----
+# Create a map to visualize which method minimizes the difference for each ZIP code ----
 diff_real_zip_code_aggregated_map <-
   # Initialize ggplot for map
   ggplot() +
