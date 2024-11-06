@@ -54,7 +54,7 @@ library(dplyr)
 create_municipality_polygon <- function() {
   coords <- matrix(c(
     0, 0,     # Bottom-left
-    3, 1.5,   # Bottom-right
+    3, 0.5,   # Bottom-right
     4, 2.5,   # Middle-right
     3, 3,     # Top-right
     0, 3,     # Top-left
@@ -69,7 +69,7 @@ create_municipality_polygon <- function() {
 
 # Create Municipality 1
 municipality1 <- create_municipality_polygon()
-municipality1$id <- "Municipality 1"
+municipality1$id <- "Municipality"
 
 # Function to create a realistic polygon for Postal Code Area 1
 create_zip_code_polygon1 <- function() {
@@ -88,18 +88,39 @@ create_zip_code_polygon1 <- function() {
 
 # Create Postal Code Area 1
 zip_code1 <- create_zip_code_polygon1()
-zip_code1$id <- "ZIP Code Area 1"
+zip_code1$id <- "ZIP Code"
 
 
 # Combine the shapes into a single data frame for plotting
-zip_codes <- zip_code1
+fake_zip_codes <- zip_code1
 
+fake_zip_codes_centroid <- sf::st_centroid(fake_zip_codes)
+
+# Create Municipality 1
+municipality2 <- create_municipality_polygon()
+municipality2$id <- "Municipality"
+zip_code1$id <- "ZIP Code"
+
+library(viridis)
+# Generate colors from the inferno palette
+viridis_colors <- viridis::viridis(5)
+
+# Create a named vector for fill colors
+color_mapping <- c(
+  "Municipality 1" = viridis_colors[1],       # Color for Municipality
+  "Zip Code" = viridis_colors[3]      # Color for Fake Zip Codes
+)
+
+# Set desired legend order
+desired_order <- c("Municipality 1", "Zip Code")
 
 # Plot the selected municipality and postal code areas with overlap highlighted
+
 ggplot() +
-  geom_sf(data = municipality1, aes(fill = id), alpha = 0.5, color = "black") +
-  geom_sf(data = zip_codes, aes(fill = id), alpha = 0.5, color = "black") +
-  scale_fill_brewer(palette = "Set3") +
+  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order)), alpha = 0.4, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order)), alpha = 0.8, color = "black") +
+ 
+  scale_fill_manual(values = color_mapping, name = "Layers") +
   labs(title = "Overlapping But Incongruent Boundaries",
        fill = "Layers") +
   theme_minimal() +
@@ -441,23 +462,23 @@ zip_code1$id <- "ZIP Code"
 
 library(viridis)
 # Generate colors from the inferno palette
-inferno_colors <- viridis::inferno(4)
+viridis_colors <- viridis::viridis(5)
 
 # Create a named vector for fill colors
 color_mapping1 <- c(
-  "Municipality" = inferno_colors[2],       # Color for Municipality
-  "Fake Zip Codes" = inferno_colors[3],      # Color for Fake Zip Codes
-  "Centroid" = "red"                         # Color for Centroid
+  "Municipality 1" = viridis_colors[1],       # Color for Municipality
+  "Zip Code" = viridis_colors[3],      # Color for Fake Zip Codes
+  "Centroid" = "black"                         # Color for Centroid
 )
 
 # Set desired legend order
-desired_order1 <- c("Municipality", "Fake Zip Codes", "Centroid")
+desired_order1 <- c("Municipality 1", "Zip Code", "Centroid")
 
 # Plot for municipality1
 map1 <- ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality", levels = desired_order1)), alpha = 0.75, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Fake Zip Codes", levels = desired_order1)), alpha = 0.5, color = "black") +
-  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "red", size = 3) +
+  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
   scale_fill_manual(values = color_mapping1, name = "Layers") +
   labs(title = "High Accuracy") +
   theme_minimal() +
@@ -465,9 +486,9 @@ map1 <- ggplot() +
 
 # Plot for municipality2
 map2 <- ggplot() +
-  geom_sf(data = municipality2, aes(fill = factor("Municipality", levels = desired_order1)), alpha = 0.75, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("Fake Zip Codes", levels = desired_order1)), alpha = 0.5, color = "black") +
-  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "red", size = 3) +
+  geom_sf(data = municipality2, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
+  geom_sf(data = fake_zip_codes, aes(fill = factor("Zip Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
   scale_fill_manual(values = color_mapping1, name = "Layers") +
   labs(title = "Low Accuracy") +
   theme_minimal() +
@@ -573,11 +594,11 @@ zip_code1$id <- "ZIP Code"
 # Function to create a realistic polygon for Postal Code Area 1
 create_overlap_polygon <- function() {
   coords <- matrix(c(
-    1, 0,     # Bottom-left
-    3, 0.5,    # Bottom-right
-    3, 1.5,     # Top-right
-    1, 1.5,     # Top-left
-    1, 0       # Closing the polygon
+    1.02, 0.02,     # Bottom-left
+    2.98, 0.52,    # Bottom-right
+    2.98, 1.48,     # Top-right
+    1.02, 1.48,     # Top-left
+    1.02, 0.02       # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
   st_polygon(list(coords)) |>
@@ -596,10 +617,10 @@ overlap$id <- "Largest Areal Overlap"
 
 # Create a named vector for fill colors
 color_mapping2 <- c(
-  "Municipality 1" = inferno_colors[1],  # Color for Municipality 1
-  "Municipality 2" = inferno_colors[2],  # Color for Municipality 2
-  "Zip Code" = inferno_colors[3],        # Color for Zip Code
-  "Overlap" = inferno_colors[4]          # Color for Overlap
+  "Municipality 1" = viridis_colors[1],  # Color for Municipality 1
+  "Municipality 2" = viridis_colors[2],  # Color for Municipality 2
+  "Zip Code" = viridis_colors[3],        # Color for Zip Code
+  "Overlap" = viridis_colors[4]          # Color for Overlap
 )
 
 # Set desired legend order
@@ -607,10 +628,10 @@ desired_order2 <- c("Municipality 1", "Municipality 2", "Zip Code", "Overlap")
 
 # Create a plot
 ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.4, color = "black") +  # Color for Municipality 1
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.4, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code1, aes(fill = factor("Zip Code", levels = desired_order2)), alpha = 0.5, color = "blue") +      # Color for Zip Code
-  geom_sf(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), alpha = 0.8, color = "red", size = 1.5) +  # Color for Overlap
+  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 1
+  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 2
+  geom_sf(data = zip_code1, aes(fill = factor("Zip Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for Zip Code
+  geom_sf(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), alpha = 0.8, color = "black", size = 1.5) +  # Color for Overlap
   scale_fill_manual(values = color_mapping2, 
                     name = "Layers") +  # Use the named vector for specific colors
   labs(title = "Areal Matching: Largest Overlap") +
@@ -735,29 +756,34 @@ inferno_colors <- viridis::inferno(5)  # Generate 5 colors to use for distinct l
 
 # Create a named vector for fill colors
 color_mapping3 <- c(
-  "Municipality 1" = inferno_colors[1],     # Color for Municipality 1
-  "Municipality 2" = inferno_colors[2],     # Color for Municipality 2
-  "Zip Code" = inferno_colors[3],           # Color for Zip Code
-  "Shares Municipality 1" = inferno_colors[4],  # Color for Shares of Municipality 1
-  "Shares Municipality 2" = inferno_colors[5]   # Color for Shares of Municipality 2
+  "Municipality 1" = viridis_colors[1],     # Color for Municipality 1
+  "Municipality 2" = viridis_colors[2],     # Color for Municipality 2
+  "Zip Code" = viridis_colors[3],           # Color for Zip Code
+  "Shares Municipality 1" = viridis_colors[4],  # Color for Shares of Municipality 1
+  "Shares Municipality 2" = viridis_colors[5]   # Color for Shares of Municipality 2
 )
 
 # Set desired legend order
 desired_order3 <- c("Municipality 1", "Municipality 2", "Zip Code", "Shares Municipality 1", "Shares Municipality 2")
 
+library(ggpattern)
+
 
 # Create the plot
+
 ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), alpha = 0.5, color = "black") +  # Color for Municipality 1
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), alpha = 0.5, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code, aes(fill = factor("Zip Code", levels = desired_order3)), alpha = 0.5, color = "blue") +      # Color for Zip Code
-  geom_sf(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), alpha = 0.7, color = "red") +  # Shares for Municipality 1
-  geom_sf(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), alpha = 0.7, color = "orange") +  # Shares for Municipality 2
+  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), alpha = 0.3, color = "black") +  # Color for Municipality 1
+  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), alpha = 0.3, color = "black") +  # Color for Municipality 2
+  geom_sf(data = zip_code, aes(fill = factor("Zip Code", levels = desired_order3)), alpha = 0.7, color = "black") +      # Color for Zip Code
+  geom_sf(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), alpha = 0.9, color = "black") +  # Shares for Municipality 1
+  geom_sf(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), alpha = 0.9, color = "black") +  # Shares for Municipality 2
   scale_fill_manual(values = color_mapping3, 
                     name = "Layers") +  # Use the named vector for specific colors
   labs(title = "Area-weighted Spatial Interpolation") +
   theme_minimal() +
   theme(legend.position = "right")
+
+
 
 ```
 
