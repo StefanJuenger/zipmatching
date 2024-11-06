@@ -499,7 +499,6 @@ map2 <- ggplot() +
   plot_annotation(title = "Accuracy of Centroid Linking")
 
 ```
-
 One benefit of this approach is its simplicity and efficiency, allowing for a quick linking process. 
 However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the zip code area, nor does it account for the actual overlap or shape of the units.
 To do the linking process, we need to calculate centroids for each zip code and use the `sf::st_join` function to identify in which municipality each centroid is located.
