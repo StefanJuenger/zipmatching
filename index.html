@@ -107,7 +107,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="at-a-glance" class="level1">
 <h1>At a glance</h1>
-<!-- to be added  -->
+<p>What do we do when we want to link overlapping but incongruent spatial units? This tool provides replicable code to guide you through the linking process and evaluate your linking strategy. The tool application highlights the following steps</p>
+<ul>
+<li>Apply three different matching methods (centroid matching, areal matching, and areal interpolation)</li>
+<li>Evaluate the differences, effectiveness, and accuracy of the different matching techniques</li>
+<li>Evaluate the impact of the matching decision on the research question</li>
+</ul>
+<section id="table-of-content" class="level3">
+<h3 class="anchored" data-anchor-id="table-of-content">Table of Content</h3>
+<p><a href="#introduction">Introduction</a></p>
+<p><a href="#setup">Setup</a></p>
+<p><a href="#tool-application">Tool application</a></p>
+<p><a href="#conclusion-and-recommendations">Conclusion and recommendations</a></p>
+</section>
 </section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
@@ -124,9 +136,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>This tool addresses this challenge by highlighting linking techniques that can be used to successfully link the datasets and assessing the uncertainty of the linking process.</p>
-</section>
-<section id="data-prerequisites-and-description" class="level1">
-<h1>Data Prerequisites and Description</h1>
+<section id="data-prerequisites-and-description" class="level2">
+<h2 class="anchored" data-anchor-id="data-prerequisites-and-description">Data Prerequisites and Description</h2>
 <p>To replicate this tool, researchers need the following:</p>
 <ul>
 <li>Survey data that includes an identifier for the target areal units where respondents reside and for which the attribute needs to be linked or estimated</li>
@@ -150,8 +161,8 @@ Important
 </div>
 <p>The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. We rely on the Open Data portal ArcGIS Hub to access the geometries of the <a href="https://hub.arcgis.com/maps/esri-de-content::postleitzahlengebiete-in-deutschland">German ZIP code areas</a> and <a href="https://hub.arcgis.com/maps/60eb682c95f44ba7b10fee66d871859d">municipalities</a>. Data can be downloaded directly as a shapefile or GeoPackage file. We work with a geospatial data type called vector data, which is organized similarly to any other data table: each row represents a geometric object (e.g., a ZIP code area or a municipality), and each column holds an attribute (e.g., population density). For detailed information on handling geospatial data and using the package <code>sf</code>, you can refer to our course <a href="https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2024/">“Introduction to Geospatial Techniques for Social Scientists in R”</a>.</p>
 </section>
-<section id="tool-functions-to-assess-the-spatial-linking-process" class="level1">
-<h1>Tool Functions To Assess the Spatial Linking Process</h1>
+<section id="tool-functions-to-assess-the-spatial-linking-process" class="level2">
+<h2 class="anchored" data-anchor-id="tool-functions-to-assess-the-spatial-linking-process">Tool Functions To Assess the Spatial Linking Process</h2>
 <p>This tool application provides replicable code to guide the user through the linking process and assess their linking strategy. The tutorial highlights the following steps:</p>
 <ul>
 <li><p>Centroid linkage: This technique involves linking data based on the central point (centroid) of a geographic area. For example, the centroid of a ZIP code area is linked to the municipality in which the centroid is located.</p></li>
@@ -161,10 +172,13 @@ Important
 <li><p>Influence of Linking Technique on Research Question: Analyzes how the choice of linking technique affects the outcomes and interpretations of the research question, ensuring that the conclusions drawn are robust and reliable.</p></li>
 </ul>
 </section>
-<section id="getting-started" class="level1">
-<h1>Getting started</h1>
-<section id="packages" class="level2">
-<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+</section>
+<section id="setup" class="level1">
+<h1>Setup</h1>
+<section id="getting-started" class="level2">
+<h2 class="anchored" data-anchor-id="getting-started">Getting started</h2>
+<section id="packages" class="level3">
+<h3 class="anchored" data-anchor-id="packages">Packages</h3>
 <p>There are several packages out there that allow geospatial data handling in R. Since we are working mainly with vector data, we heavily rely on the package <a href="https://doi.org/10.32614/CRAN.package.sf">sf</a>. The packages <code>dplyr</code>, <code>ggplot2</code>, and <code>tibble</code> are used for data manipulation and visualization.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary packages ----</span></span>
@@ -175,8 +189,8 @@ Important
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)      <span class="co"># For creating and managing tibbles (data frames)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="geospatial-data" class="level2">
-<h2 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h2>
+<section id="geospatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h3>
 <p>In Germany, the 5-character zip code areas often do not align with municipal boundaries, leading to both overlap and incongruence. This mismatch can be more pronounced in rural areas, where larger zip code regions may encompass multiple small municipalities. In contrast, urban areas tend to have several distinct zip codes that fall within a single municipality. For example, the capital Berlin, as a German ‘city-state’, is one municipality with 190 zip codes.</p>
 <p>When selecting and loading the geospatial data, we always check for three sources of errors: - Consistent (projected) coordinate reference systems. In our case, both shapefiles are projected in WGS 84 (EPSG: 3857). - Timeliness of administrative boundaries and territorial reforms. For example, we use the 2022 municipality boundaries and the 2023 zip code areas. - Existence, column names, and format of identifiers and variables of interest. For instance, we require the zip code and municipality code to be in character format in our data frame.</p>
 <div class="cell" data-layout-align="center">
@@ -226,16 +240,16 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 </div>
 </div>
 </section>
-<section id="survey-data" class="level2">
-<h2 class="anchored" data-anchor-id="survey-data">Survey Data</h2>
+<section id="survey-data" class="level3">
+<h3 class="anchored" data-anchor-id="survey-data">Survey Data</h3>
 <p>Due to data protection regulations, we cannot use real-world survey data, but we base our tool application on simulated data that were created on the basis of the <a href="https://search.gesis.org/research_data/ZA7714">GLES Tracking November 2023, T56</a>. To prepare the simulated data, we clean the original survey data to retain only valid zip codes and then link the data with geospatial data using centroid and areal matching techniques, followed by area-weighted interpolation for population and area estimates. Finally, we calculate correlations between the variable of interest, “afd_rating” and from the geospatial data derived population densities. In a next step, we generate random ZIP codes, introducing some invalid entries to mimic the real-world data. We repeat the linking process and then simulate the dependent variable based on the original correlations to derive the simulated data. To replicate the creation of the simulated survey data, we provide the R-Script <a href="./test/create_simulated_survey.R">here</a>.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"./data-raw/simulated_survey_data.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
-<section id="inspecting-data" class="level1">
-<h1>Inspecting data</h1>
+<section id="inspecting-data" class="level2">
+<h2 class="anchored" data-anchor-id="inspecting-data">Inspecting data</h2>
 <p>Before linking survey data, it is crucial to inspect the zip codes provided by respondents, especially when participants entered their zip codes independently. The self-reported nature of data entry can lead to several issues, like refusal to respond or typographical errors, which can result in invalid or missing zip codes. The provided code categorizes the self-reported zip codes into three statuses: “Non Response”, “Invalid ZIP Code” (For instance, zip codes that are not five characters long or that do not exist in the predefined list of valid zip codes), and “Valid”. By utilizing this categorization, researchers can identify and address potential data quality issues before data integration. <!--- footnote: could also try to resolve issues with zip codes --></p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new column 'status' to categorize the zip codes</span></span>
@@ -306,10 +320,13 @@ Important
 </div>
 </div>
 </section>
-<section id="matching-methods" class="level1">
-<h1>Matching methods</h1>
-<section id="sec-simpoints" class="level2">
-<h2 class="anchored" data-anchor-id="sec-simpoints">Data praperation</h2>
+</section>
+<section id="tool-application" class="level1">
+<h1>Tool application</h1>
+<section id="matching-methods" class="level2">
+<h2 class="anchored" data-anchor-id="matching-methods">Matching methods</h2>
+<section id="data-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="data-simulation">Data simulation</h3>
 <p>We’re sampling 1,000 points within each valid zip code area to later assess the accuracy of our linking techniques. By simulating 1,000 hypothetical living locations for respondents who reported living in a specific zip code area, we can evaluate whether our method accurately aligns each sampled point with the correct municipality. This approach allows us to identify any discrepancies or inaccuracies in the linking process and compare the three linking methods.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample points within zip code areas ----</span></span>
@@ -342,8 +359,8 @@ Important
 <span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">real_inhabitants_municipality =</span> inhabitants_municipality)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="centroid-matching" class="level2">
-<h2 class="anchored" data-anchor-id="centroid-matching">Centroid matching</h2>
+<section id="centroid-matching" class="level3">
+<h3 class="anchored" data-anchor-id="centroid-matching">Centroid matching</h3>
 <p>This method uses the centroid (center point) of each zip code area to find the corresponding municipality. It assumes that the center point accurately represents the zip code’s location in terms of municipality boundaries.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -371,8 +388,8 @@ Important
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(zip_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="areal-matching" class="level2">
-<h2 class="anchored" data-anchor-id="areal-matching">Areal matching</h2>
+<section id="areal-matching" class="level3">
+<h3 class="anchored" data-anchor-id="areal-matching">Areal matching</h3>
 <p>This method assigns each zip code area to the municipality in which the majority of its area lies.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -400,8 +417,8 @@ Important
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(zip_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="areal-interpolation" class="level2">
-<h2 class="anchored" data-anchor-id="areal-interpolation">Areal interpolation</h2>
+<section id="areal-interpolation" class="level3">
+<h3 class="anchored" data-anchor-id="areal-interpolation">Areal interpolation</h3>
 <p>This method uses areal interpolation to distribute municipality inhabitants data proportionally across overlapping ZIP code areas.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -449,13 +466,13 @@ Important
 <p>For advanced users, we would also like to point out the package <a href="https://github.com/chris-prener/areal"><code>areal</code></a> that builds upon the <code>sf</code>package we use here and expands the functions for area weighted interpolations <span class="citation" data-cites="Prener">[@Prener]</span>.</p>
 </section>
 </section>
-<section id="assessing-the-matching-methods" class="level1">
-<h1>Assessing the matching methods</h1>
+<section id="assessing-the-matching-methods" class="level2">
+<h2 class="anchored" data-anchor-id="assessing-the-matching-methods">Assessing the matching methods</h2>
 <!-- exchange for population density? -->
-<section id="data-preparation" class="level2">
-<h2 class="anchored" data-anchor-id="data-preparation">Data preparation</h2>
-<p>In <a href="#sec-simpoints" class="quarto-xref">Section&nbsp;7.1</a>, we sampled nearly 1,000,000 points to simulate 1,000 hypothetical living locations within each ZIP code area. This allows us to assess the accuracy and consistency of the linking process and compare the three matching methods. The step is crucial because, for each simulated point, we know the exact municipality match, which provides the correct value for the number of inhabitants in the respondents’ municipality.</p>
-<p>It is important to note that we focus on the differences in the number of inhabitants per municipality to evaluate the matching process because that is our main variable of interest. Specifically, if a ZIP code area overlaps with spatial clusters of municipalities that have a similar number of inhabitants - areas with high positive spatial autocorrelation - the differences will naturally be smaller, even if the matching methods yield different results. Therefore, the evaluation of the linking process — and ultimately the selection of the most appropriate method — should consider the main variable(s) of interest</p>
+<section id="data-preparation" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation">Data preparation</h3>
+<p>We sampled nearly 1,000,000 points to simulate 1,000 hypothetical living locations within each ZIP code area (see <a href="#data-simulation">Data simulation</a>). This allows us to assess the accuracy and consistency of the linking process and compare the three matching methods. The step is crucial because, for each simulated point, we know the exact municipality match, which provides the correct value for the number of inhabitants in the respondents’ municipality.</p>
+<p>It is important to note that we focus on the differences in the number of inhabitants <!-- population density --> per municipality to evaluate the matching process because that is our main variable of interest. Specifically, if a ZIP code area overlaps with spatial clusters of municipalities that have a similar number of inhabitants - areas with high positive spatial autocorrelation - the differences will naturally be smaller, even if the matching methods yield different results. Therefore, the evaluation of the linking process and ultimately the selection of the most appropriate method should consider the main variable(s) of interest</p>
 <p>Let’s calculate for each point location the difference between real and estimated number of inhabitants for each matching method (centroid matching, area matching and area-weighted interpolation) and combine the differences calculated for each method.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Difference with Centroid Matching ----</span></span>
@@ -698,11 +715,9 @@ Important
 <span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="accuracy-of-matching-methods" class="level2">
-<h2 class="anchored" data-anchor-id="accuracy-of-matching-methods">Accuracy of matching methods</h2>
-<ul>
-<li>Differences to the ‘real’ number of inhabitants on average the same between the matching methods</li>
-</ul>
+<section id="accuracy-of-matching-methods" class="level3">
+<h3 class="anchored" data-anchor-id="accuracy-of-matching-methods">Accuracy of matching methods</h3>
+<p>First, we plot the differences between our variable of interest, number of inhabitants, for each matching method (centroid matching, area matching, and area-weighted interpolation) compared with the real estimate based on the point locations. The histogram shows that all three matching methods differ from the real estimate, but on average, they exhibit similar levels of accuracy.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a histogram to visualize the distribution of differences for each matching method ----</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>difference_histogram <span class="ot">&lt;-</span></span>
@@ -736,14 +751,12 @@ Important
 </div>
 </div>
 </section>
-<section id="consistency-of-matching-methods" class="level2">
-<h2 class="anchored" data-anchor-id="consistency-of-matching-methods">Consistency of matching methods</h2>
-<ul>
-<li>Comparison of scaled differences between matching methods</li>
-<li>Narrower, centered distributions suggest better consistency across the matched points.</li>
-<li>Wider, more spread-out distributions suggest more variability in the differences, meaning some methods might be more volatile or less accurate in specific areas.</li>
-<li></li>
-</ul>
+<section id="consistency-of-matching-methods" class="level3">
+<h3 class="anchored" data-anchor-id="consistency-of-matching-methods">Consistency of matching methods</h3>
+<p>In the next step, we aim to assess whether the matching methods are consistent. To do this, we plot the densities of the scaled differences across the different matching methods. By examining the pairwise comparisons of the matching methods, we can determine which methods produce more consistent results (indicated by smaller variance in the differences) and which methods tend to diverge more (indicated by larger variance).</p>
+<p>Overall, we observe that the differences between the matching methods are relatively small, as all three density plots are centered around zero. This suggests that the compared matching methods produce similar results when linking the data.</p>
+<p>Wile the location of the peak tells us about the magnitude of the differences, the width of the distribution reflects the variability of those differences.</p>
+<p>When comparing centroid and areal matching, we observe a slightly wider density plot, suggesting that these methods may perform differently in certain areas. In contrast, the other plots indicate small and consistent differences, implying that the respective methods perform similarly across the data.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plots to compare scaled differences across matching methods ----</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>difference_densities <span class="ot">&lt;-</span></span>
@@ -778,8 +791,8 @@ Important
 </div>
 </div>
 </div>
-<p>This map allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.</p>
-<p>Different matching methods perform better in certain areas. For example, in more populated regions like cities, ZIP codes are usually clearly located within a single municipality, so centroid matching performs very well. On average, areal interpolation, which takes more factors into account, performs the best across the entire area. However, this method requires the variable of interest for the matching process which might not always be available. All in all: Different matching methods perform better in some places.</p>
+<p>To further assess the performance of the matching methods in different areas, we create a map that allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes. The map shows which method results in the smallest difference when compared to the actual population values, as estimated via the simulated points.</p>
+<p>We observe that different matching methods perform better in certain regions. For example, in densely populated areas like cities, ZIP codes are often contained within a single municipality, so centroid matching performs particularly well in these areas. On average, areal interpolation, which takes multiple factors into account, performs the best across the entire study area. However, this method requires (all) spatial variables of interest to be available for the matching process, which may not always be the case and can be very resource-intensive. <!-- hier kann man leider wenig sehen: ggfs. doch mit gesamt karte austauschen? --></p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a map to visualize which method minimizes the difference for each zip code ----</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>diff_real_zip_code_aggregated_map <span class="ot">&lt;-</span></span>
@@ -812,21 +825,49 @@ Important
 <span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use viridis color scale to differentiate differences</span></span>
 <span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>min_method)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>min_method)</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>diff_real_zip_code_aggregated_map</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 </section>
-<section id="effect-of-matching-method-on-bivariate-correlation" class="level2">
-<h2 class="anchored" data-anchor-id="effect-of-matching-method-on-bivariate-correlation">Effect of matching method on bivariate correlation</h2>
-<p>Nearly no difference</p>
+<section id="effect-of-matching-method-on-bivariate-correlation" class="level3">
+<h3 class="anchored" data-anchor-id="effect-of-matching-method-on-bivariate-correlation">Effect of matching method on bivariate correlation</h3>
+<!-- brauchen population density! -->
+<p>Finally, we aim to assess whether and how the different matching methods influence the answers to our research question. Rather than developing an elaborate model, we take a more straightforward approach by examining the correlation between our variable of interest—the AfD rating — and the matched context variable, population density. In this example, we can compare the correlation coefficients across the different matching methods and with population density at the zip code level, as we have access to this information.</p>
+<p>As shown in the plot, there are no substantial or significant differences in the correlation coefficients between the various matching methods or when compared to the zip code-level population density. This suggests that the linking process perform similarly well in this case.</p>
+<p>From a substantive perspective, the correlation is consistently small across all comparisons. Specifically, we observe that living in areas with higher population density is weakly correlated with lower AfD ratings. In other words, individuals living in more densely populated areas tend to support the AfD less—though the strength of this relationship is modest.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
-<section id="conclusion-and-recommendations-for-further-analyses" class="level1">
-<h1>Conclusion and recommendations for further analyses</h1>
+</section>
+<section id="conclusion-and-recommendations" class="level1">
+<h1>Conclusion and recommendations</h1>
+<p>In this tool application, we evaluated three matching methods—centroid matching, area matching, and area-weighted interpolation—to link survey data with geospatial context variables in order to investigate whether population density is associated with support for far-right parties in Germany.</p>
+<p>Our findings indicate that, while all three methods show slight deviations from the real population estimates (derived from simulated point locations), they generally produce similar results in terms of accuracy. In terms of consistency, subtle differences were observed: centroid matching performed slightly better in densely populated areas, while area-weighted interpolation yielded the best results on average across the entire study area. However, despite these variations, the choice of matching method had minimal impact on the research outcomes, including the correlation between AfD ratings and population density.</p>
+<p>Our top three recommendations (tbd mit Stefan):</p>
 <ul>
-<li>Short summary</li>
-<li>Recommendation</li>
-<li>Short theoretical discussion about neighbourhood definition (uncertain geographic unit problem)</li>
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
 </ul>
+<p>Choosing a matching method, however, is only one aspect of the researcher’s decision-making process and does not absolve them from the conceptual considerations inherent in the linking process: how to define the “neighborhood”.</p>
+<p>When defining neighborhoods, researchers must decide which geographic unit best captures the relevant social or environmental context. Different definitions of “neighborhood” can lead to different conclusions about the relationships between spatial context and outcomes like political preferences. For example, the uncertain geographic unit problem (UGP) highlights the importance of carefully considering spatial boundaries in social research. The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as political participation or support for far-right parties.</p>
+<p>The methods evaluated in this application provide different ways of addressing the challenges posed by mismatched or incongruent boundaries when defining a “neighborhood.” However, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and contextual data.</p>
 </section>
 <section id="references" class="level1">
 <h1>References</h1>
