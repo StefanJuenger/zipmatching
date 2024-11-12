@@ -4,6 +4,7 @@ author:
   - "Anne Stroppe"
   - "Stefan Jünger"
 image: img/logo_areamatch.jpg
+bibliography: references.bib
 ---
 
 
@@ -64,7 +65,7 @@ These two different spatial units are often not congruent, increasing uncertaint
 library(sf)
 library(ggplot2)
 library(dplyr)
-
+library(viridis)
 
 # Function to create a realistic polygon for Municipality 1
 create_municipality_polygon <- function() {
@@ -78,9 +79,9 @@ create_municipality_polygon <- function() {
     0, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 1
@@ -97,19 +98,19 @@ create_zip_code_polygon1 <- function() {
     1, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Postal Code Area 1
 zip_code1 <- create_zip_code_polygon1()
 zip_code1$id <- "ZIP Code"
 
-
 # Combine the shapes into a single data frame for plotting
 fake_zip_codes <- zip_code1
 
+# Calculate centroid for the ZIP code areas
 fake_zip_codes_centroid <- sf::st_centroid(fake_zip_codes)
 
 # Create Municipality 1
@@ -117,7 +118,6 @@ municipality2 <- create_municipality_polygon()
 municipality2$id <- "Municipality"
 zip_code1$id <- "ZIP Code"
 
-library(viridis)
 # Generate colors from the inferno palette
 viridis_colors <- viridis::viridis(5)
 
@@ -131,16 +131,15 @@ color_mapping <- c(
 desired_order <- c("Municipality 1", "ZIP Code")
 
 # Plot the selected municipality and postal code areas with overlap highlighted
-
-ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order)), alpha = 0.8, color = "black") +
- 
-  scale_fill_manual(values = color_mapping, name = "Layers") +
-  labs(title = "Overlapping But Incongruent Boundaries",
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order)), alpha = 0.4, color = "black") +
+  ggplot2::geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order)), alpha = 0.8, color = "black") +
+  ggplot2::scale_fill_manual(values = color_mapping, name = "Layers") +
+  ggplot2::labs(title = "Overlapping But Incongruent Boundaries",
        fill = "Layers") +
-  theme_minimal() +
-  theme(legend.position = "right")
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "right")
+
 
 
 ```
@@ -159,7 +158,7 @@ For this tool application, we rely on three data sources: (synthetic) survey dat
 
 We base our analysis example on survey data from the German Longitudinal Election Study (GLES). 
 The GLES Tracking consists of short cross-sectional online surveys (CAWI) conducted three times a year.
-Each cross-sectional sample includes approximately 1,000 respondents.
+Each cross-sectional sample includes approximately 1,000 respondents [@gles_gles_2024].
 For this analysis, we create a synthetic data set based on the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
 Respondents were asked to indicate their approval of the German radical right party AfD on a scale from 1 ("I don't think highly of this party at all") to 11 ("I think very highly of this party") (variable t14h). 
 At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).
@@ -401,6 +400,7 @@ It assumes that the center point accurately represents the ZIP code's location i
 
 ```{r, echo = F}
 
+# Load necessary library
 library(patchwork)
 
 # Function to create a realistic polygon for Municipality 1
@@ -415,9 +415,9 @@ create_municipality_polygon <- function() {
     0, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 1
@@ -434,24 +434,21 @@ create_zip_code_polygon1 <- function() {
     1, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Postal Code Area 1
 zip_code1 <- create_zip_code_polygon1()
 zip_code1$id <- "ZIP Code"
 
-
 # Combine the shapes into a single data frame for plotting
 fake_zip_codes <- zip_code1
 
 fake_zip_codes_centroid <- sf::st_centroid(fake_zip_codes)
 
-
 # Add centroids to ZIP code data
-
 
 # Function to create a realistic polygon for Municipality 1
 create_municipality_polygon <- function() {
@@ -469,9 +466,9 @@ create_municipality_polygon <- function() {
     0, 0.15      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 1
@@ -494,41 +491,36 @@ color_mapping1 <- c(
 desired_order1 <- c("Municipality 1", "ZIP Code", "Centroid")
 
 # Plot for municipality1
-map1 <- ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
-  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
-  scale_fill_manual(values = color_mapping1, name = "Layers") +
-  labs(title = "High Accuracy") +
-  theme_minimal() +
-  theme(legend.position = "right")
+map1 <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
+  ggplot2::geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  ggplot2::geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
+  ggplot2::scale_fill_manual(values = color_mapping1, name = "Layers") +
+  ggplot2::labs(title = "High Accuracy") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "right")
 
 # Plot for municipality2
-map2 <- ggplot() +
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
-  geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
-  geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
-  scale_fill_manual(values = color_mapping1, name = "Layers") +
-  labs(title = "Low Accuracy") +
-  theme_minimal() +
-  theme(legend.position = "right") 
+map2 <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = municipality2, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
+  ggplot2::geom_sf(data = fake_zip_codes, aes(fill = factor("ZIP Code", levels = desired_order1)), alpha = 0.8, color = "black") +
+  ggplot2::geom_sf(data = fake_zip_codes_centroid, aes(fill = factor("Centroid", levels = desired_order1)), shape = 20, color = "black", size = 4) +
+  ggplot2::scale_fill_manual(values = color_mapping1, name = "Layers") +
+  ggplot2::labs(title = "Low Accuracy") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "right") 
 
 # Combine the two plots using patchwork
-(map1 | map2) + plot_layout(guides = "collect", ncol = 2) +
-  plot_annotation(title = "Accuracy of Centroid Linking")
 
-centroid_map <- (map1 | map2) + plot_layout(guides = "collect") +
-  plot_annotation(title = "Accuracy of Centroid Linking")
- 
-ggsave("./test/centroid_map.png", centroid_map, dpi = 300, width = 8, height = 6, units = "in")
+centroid_map <- (map1 | map2) + patchwork::plot_layout(guides = "collect", ncol = 2) +
+  patchwork::plot_annotation(title = "Accuracy of Centroid Linking")
+
+# Save the combined plot
+ggplot2::ggsave("./test/centroid_map.png", centroid_map, dpi = 300, width = 8, height = 6, units = "in")
+
 
 ```
-<<<<<<< HEAD
 
-![TestAbbildung](./test/centroid_map.png)
-
-=======
->>>>>>> c07a8d3e4a75db03c42dfe56cc7338215389fb07
 One benefit of this approach is its simplicity and efficiency, allowing for a quick linking process. 
 However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the ZIP code area, nor does it account for the actual overlap or shape of the units.
 To do the linking process, we need to calculate centroids for each ZIP code and use the `sf::st_join` function to identify in which municipality each centroid is located.
@@ -558,6 +550,12 @@ This method assigns each ZIP code area to the municipality in which the  majorit
 ```{r, echo = FALSE}
 
 
+# Load necessary libraries
+library(sf)        # For spatial data handling
+library(viridis)   # For color palettes
+library(ggplot2)   # For plotting
+library(ggpattern) # For pattern filling in geom_sf
+
 # Function to create a realistic polygon for Municipality 1
 create_municipality_polygon <- function() {
   coords <- matrix(c(
@@ -571,9 +569,9 @@ create_municipality_polygon <- function() {
     0, 0     # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 1
@@ -591,9 +589,9 @@ create_municipality_polygon <- function() {
     0,0
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 municipality2 <- create_municipality_polygon()
@@ -609,9 +607,9 @@ create_zip_code_polygon1 <- function() {
     1, -0.5      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Postal Code Area 1
@@ -630,9 +628,9 @@ create_overlap_polygon <- function() {
     1, 0       # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 overlap <- create_overlap_polygon()
@@ -646,30 +644,28 @@ overlap$id <- "Largest Areal Overlap"
 
 # Create a named vector for fill colors
 color_mapping2 <- c(
-  "Municipality 1" = viridis_colors[1],  # Color for Municipality 1
-  "Municipality 2" = viridis_colors[2],  # Color for Municipality 2
-  "ZIP Code" = viridis_colors[3],        # Color for ZIP Code
-  "Overlap" = viridis_colors[4]          # Color for Overlap
+  "Municipality 1" = viridis::viridis(5)[1],  # Color for Municipality 1
+  "Municipality 2" = viridis::viridis(5)[2],  # Color for Municipality 2
+  "ZIP Code" = viridis::viridis(5)[3],        # Color for ZIP Code
+  "Overlap" = viridis::viridis(5)[4]          # Color for Overlap
 )
 
 # Set desired legend order
 desired_order2 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Overlap")
 
-library(ggpattern)
-
-
 # Create a plot
-ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 1
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code1, aes(fill = factor("ZIP Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for ZIP Code
-   geom_sf_pattern(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), 
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 1
+  ggplot2::geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 2
+  ggplot2::geom_sf(data = zip_code1, aes(fill = factor("ZIP Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for ZIP Code
+  ggpattern::geom_sf_pattern(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), 
                   pattern = "stripe", pattern_fill = "black", pattern_spacing = 0.02, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Closer stripe pattern for Overlap
-  scale_fill_manual(values = color_mapping2, 
+  ggplot2::scale_fill_manual(values = color_mapping2, 
                     name = "Layers") +  # Use the named vector for specific colors
-  labs(title = "Areal Matching: Largest Overlap") +
-  theme_minimal() +
-  theme(legend.position = "right")
+  ggplot2::labs(title = "Areal Matching: Largest Overlap") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "right")
+
 
 ```
 
@@ -707,9 +703,12 @@ This method uses areal interpolation to distribute municipality inhabitants data
 
 ```{r, echo = FALSE}
 
-library(sf)
-library(ggplot2)
-library(dplyr)
+# Load necessary libraries
+library(sf)        # For spatial data handling
+library(ggplot2)   # For plotting
+library(dplyr)     # For data manipulation
+library(viridis)   # For color palettes
+library(ggpattern) # For pattern filling in geom_sf
 
 # Function to create a realistic polygon for Municipality 1
 create_municipality_polygon1 <- function() {
@@ -724,9 +723,9 @@ create_municipality_polygon1 <- function() {
     0, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 1
@@ -744,9 +743,9 @@ create_municipality_polygon2 <- function() {
     0, 0      # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Municipality 2
@@ -763,9 +762,9 @@ create_zip_code_polygon <- function() {
     1, -0.5   # Closing the polygon
   ), ncol = 2, byrow = TRUE)
   
-  st_polygon(list(coords)) |>
-    st_sfc(crs = 4326) |>
-    st_sf()
+  sf::st_polygon(list(coords)) |>
+    sf::st_sfc(crs = 4326) |>
+    sf::st_sf()
 }
 
 # Create Postal Code Area
@@ -774,49 +773,46 @@ zip_code$id <- "ZIP Code"
 
 
 # Create geometries for each municipality's share in the interpolation area
-interpolated_municipality1 <- st_intersection(zip_code, municipality1) # Share from Municipality 1
+interpolated_municipality1 <- sf::st_intersection(zip_code, municipality1) # Share from Municipality 1
 interpolated_municipality1$id <- "Share from Municipality 1"
 
-interpolated_municipality2 <- st_intersection(zip_code, municipality2) # Share from Municipality 2
+interpolated_municipality2 <- sf::st_intersection(zip_code, municipality2) # Share from Municipality 2
 interpolated_municipality2$id <- "Share from Municipality 2"
 
 # Combine the shares into a single data frame
-shares_combined <- rbind(interpolated_municipality1, interpolated_municipality2)
+shares_combined <- dplyr::bind_rows(interpolated_municipality1, interpolated_municipality2)
 
-
-# Generate colors from the inferno palette
-inferno_colors <- viridis::inferno(5)  # Generate 5 colors to use for distinct layers
 
 # Create a named vector for fill colors
 color_mapping3 <- c(
-  "Municipality 1" = viridis_colors[1],     # Color for Municipality 1
-  "Municipality 2" = viridis_colors[2],     # Color for Municipality 2
-  "ZIP Code" = viridis_colors[3],           # Color for ZIP Code
-  "Shares Municipality 1" = viridis_colors[4],  # Color for Shares of Municipality 1
-  "Shares Municipality 2" = viridis_colors[5]   # Color for Shares of Municipality 2
+  "Municipality 1" = viridis::viridis(5)[1],     # Color for Municipality 1
+  "Municipality 2" = viridis::viridis(5)[2],     # Color for Municipality 2
+  "ZIP Code" = viridis::viridis(5)[3],           # Color for ZIP Code
+  "Shares Municipality 1" = viridis::viridis(5)[4],  # Color for Shares of Municipality 1
+  "Shares Municipality 2" = viridis::viridis(5)[5]   # Color for Shares of Municipality 2
 )
 
 # Set desired legend order
 desired_order3 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Shares Municipality 1", "Shares Municipality 2")
 
 
-
 # Create the plot
 
-ggplot() +
-  geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), 
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order3)), 
           alpha = 0.3, color = "black") +  # Color for Municipality 1
-  geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), 
+  ggplot2::geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order3)), 
           alpha = 0.3, color = "black") +  # Color for Municipality 2
-  geom_sf(data = zip_code, aes(fill = factor("ZIP Code", levels = desired_order3)), 
+  ggplot2::geom_sf(data = zip_code, aes(fill = factor("ZIP Code", levels = desired_order3)), 
           alpha = 0.7, color = "black") +  # Color for ZIP Code
-  geom_sf_pattern(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), 
+  ggpattern::geom_sf_pattern(data = interpolated_municipality1, aes(fill = factor("Shares Municipality 1", levels = desired_order3)), 
                   pattern = "stripe", pattern_fill = "black", pattern_spacing = 0.02, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Closer stripe pattern for Shares Municipality 1
-  geom_sf_pattern(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), 
+  ggpattern::geom_sf_pattern(data = interpolated_municipality2, aes(fill = factor("Shares Municipality 2", levels = desired_order3)), 
                   pattern = "circle", pattern_fill = "grey", pattern_spacing = 0.05, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Adjusted spacing for Shares Municipality 2
-  scale_fill_manual(values = color_mapping3, 
+  ggplot2::scale_fill_manual(values = color_mapping3, 
                     name = "Layers") +
-  theme_minimal()
+  ggplot2::theme_minimal()
+
 
 
 ```
@@ -863,7 +859,7 @@ areal_interpolation_matched <-
 
 ```
 
-For advanced users, we would also like to point out the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area-weighted interpolations [@Prener].
+For advanced users, we would also like to point out the package [`areal`](https://github.com/chris-prener/areal) that builds upon the `sf`package we use here and expands the functions for area-weighted interpolations [@prener_areal_2020].
 
 ## Assessing the matching methods
 
@@ -877,11 +873,8 @@ The step is crucial because, for each simulated point, we know the exact municip
 
 It is important to note that we focus on the differences in the number of inhabitants <!-- population density --> per municipality to evaluate the matching process because that is our main variable of interest.
 Specifically, if a ZIP code area overlaps with spatial clusters of municipalities that have a similar number of inhabitants - areas with high positive spatial autocorrelation - the differences will naturally be smaller, even if the matching methods yield different results.
-<<<<<<< HEAD
-Therefore, the evaluation of the linking process — and ultimately the selection of the most appropriate method — should consider the main variable(s) of interest. 
-=======
+
 Therefore, the evaluation of the linking process and ultimately the selection of the most appropriate method should consider the main variable(s) of interest 
->>>>>>> c07a8d3e4a75db03c42dfe56cc7338215389fb07
 
 Let's calculate for each point location the difference between real and estimated number of inhabitants for each matching method (centroid matching, area matching and area-weighted interpolation) and combine the differences calculated for each method.
 
@@ -1023,6 +1016,7 @@ diff_areal_interpolated <-
       areal_interpolation_matched$inhabitants_municipality
   )
 
+
 ```
 
 Since we are ultimately interested in how the matching compares at the ZIP code level, rather than at the (simulated) point level, we aggregate the population estimate differences at the ZIP code level. 
@@ -1130,11 +1124,12 @@ diff_real_zip_code_aggregated <-
       TRUE ~ NA
     )
   )
+
 ```
 
 ### Accuracy of matching methods
 
-First, we plot the differences between our variable of interest, number of inhabitants, for each matching method (centroid matching, area matching, and area-weighted interpolation) compared with the real estimate based on the point locations. 
+First, we plot the differences between our variable of interest, number of inhabitants, for each matching method (centroid matching, areal matching, and area-weighted interpolation) compared with the real estimate based on the point locations. 
 The histogram shows that all three matching methods differ from the real estimate, but on average, they exhibit similar levels of accuracy.
 
 ```{r}
@@ -1154,27 +1149,28 @@ difference_histogram <-
   # Remove spatial geometry for visualization purposes
   sf::st_drop_geometry() |>
   # Initialize ggplot with Difference as x-axis variable
-  ggplot(aes(x = Difference)) +
+  ggplot2::ggplot(aes(x = Difference)) +
   # Add histogram with 10 bins
-  geom_histogram(bins = 10) +
+  ggplot2::geom_histogram(bins = 10) +
   # Limit x-axis for a clear view of the distribution
-  xlim(-2500000, 2500000) +
+  ggplot2::xlim(-2500000, 2500000) +
   # Create a separate histogram for each matching method type
-  facet_wrap(~`Type`)
+  ggplot2::facet_wrap(~`Type`)
 
 difference_histogram
+
 
 ```
 
 ### Consistency of matching methods
 
 In the next step, we aim to assess whether the matching methods are consistent. 
-To do this, we plot the densities of the scaled differences across the different matching methods.
+To achieve this, we plot the densities of the scaled differences across the different matching methods.
 By examining the pairwise comparisons of the matching methods, we can determine which methods produce more consistent results (indicated by smaller variance in the differences) and which methods tend to diverge more (indicated by larger variance).
 
 Overall, we observe that the differences between the matching methods are relatively small, as all three density plots are centered around zero. This suggests that the compared matching methods produce similar results when linking the data.
 
-Wile the location of the peak tells us about the magnitude of the differences, the width of the distribution reflects the variability of those differences.
+While the location of the peak tells us about the magnitude of the differences, the width of the distribution reflects the variability of those differences.
 
 When comparing centroid and areal matching, we observe a slightly wider density plot, suggesting that these methods may perform differently in certain areas. 
 In contrast, the other plots indicate small and consistent differences, implying that the respective methods perform similarly across the data.
@@ -1197,30 +1193,25 @@ difference_densities <-
   # Scale differences for comparability across methods
   dplyr::mutate(Difference = scale(Difference)) |>
   # Initialize ggplot with Difference as x-axis variable
-  ggplot(aes(x = Difference)) +
+  ggplot2::ggplot(aes(x = Difference)) +
   # Create density plot for distribution visualization
-  geom_density() +
+  ggplot2::geom_density() +
   # Set x-axis limits to focus on main data range
-  xlim(-10, 10) +
+  ggplot2::xlim(-10, 10) +
   # Separate density plots by type of matching method
-  facet_wrap(~`Type`)
+  ggplot2::facet_wrap(~`Type`)
 
 difference_densities
+
 
 ```
 To further assess the performance of the matching methods in different areas, we create a map that allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes. The map shows which method results in the smallest difference when compared to the actual population values, as estimated via the simulated points.
 
-<<<<<<< HEAD
 This map allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.
 
-Different matching methods perform better in certain areas. For example, in more populated regions like cities, ZIP codes are usually clearly located within a single municipality, so centroid matching performs very well. 
-On average, areal interpolation, which takes more factors into account, performs the best across the entire area. However, this method requires the variable of interest for the matching process, which might not always be available.
-All in all, different matching methods perform better in some places.
-=======
 We observe that different matching methods perform better in certain regions. For example, in densely populated areas like cities, ZIP codes are often contained within a single municipality, so centroid matching performs particularly well in these areas. On average, areal interpolation, which takes multiple factors into account, performs the best across the entire study area.
 However, this method requires (all) spatial variables of interest to be available for the matching process, which may not always be the case and can be very resource-intensive.
 <!-- hier kann man leider wenig sehen: ggfs. doch mit gesamt karte austauschen? -->
->>>>>>> c07a8d3e4a75db03c42dfe56cc7338215389fb07
 
 ```{r}
 
@@ -1228,9 +1219,9 @@ However, this method requires (all) spatial variables of interest to be availabl
 # Create a map to visualize which method minimizes the difference for each ZIP code ----
 diff_real_zip_code_aggregated_map <-
   # Initialize ggplot for map
-  ggplot() +
+  ggplot2::ggplot() +
   # Add map layers with fill representing the best matching method
-  geom_sf(
+  ggplot2::geom_sf(
     data = diff_real_zip_code_aggregated, aes(fill = min_method), lwd = 0
   ) +
   # Use viridis color scale to differentiate methods
@@ -1248,15 +1239,15 @@ ggplot2::ggsave(
 
 diff_real_zip_code_aggregated_map_differences <-
   # Initialize ggplot for map
-  ggplot() +
-  geom_sf(data = zip_codes, lwd = .01) +
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(data = zip_codes, lwd = .01) +
   # Add map layers with fill representing the difference
-  geom_sf(
+  ggplot2::geom_sf(
     data = diff_real_zip_code_aggregated, aes(fill = difference), lwd = 0
   ) +
   # Use viridis color scale to differentiate differences
   scale_fill_viridis_c() +
-  facet_wrap(~min_method)
+  ggplot2::facet_wrap(~min_method)
 
 diff_real_zip_code_aggregated_map
 
@@ -1267,9 +1258,9 @@ diff_real_zip_code_aggregated_map
 <!-- brauchen population density! -->
 
 Finally, we aim to assess whether and how the different matching methods influence the answers to our research question. Rather than developing an elaborate model, we take a more straightforward approach by examining the correlation between our variable of interest—the AfD rating — and the matched context variable, population density.
-In this example, we can compare the correlation coefficients across the different matching methods and with population density at the zip code level, as we have access to this information.
+In this example, we can compare the correlation coefficients across the different matching methods and with population density at the ZIP code level, as we have access to this information.
 
-As shown in the plot, there are no substantial or significant differences in the correlation coefficients between the various matching methods or when compared to the zip code-level population density. This suggests that the linking process perform similarly well in this case.
+As shown in the plot, there are no substantial or significant differences in the correlation coefficients between the various matching methods or when compared to the ZIP code-level population density. This suggests that the linking processes perform similarly well in this case.
 
 From a substantive perspective, the correlation is consistently small across all comparisons. Specifically, we observe that living in areas with higher population density is weakly correlated with lower AfD ratings. 
 In other words, individuals living in more densely populated areas tend to support the AfD less—though the strength of this relationship is modest.
@@ -1334,41 +1325,41 @@ correlations <- linked_survey |>
 # Melt the correlation matrix into a long format
 correlations_long <- correlations %>%
   reshape2::melt(id.vars = "term") %>%
-  rename(
+  dplyr::rename(
     x = term,
     y = variable,
     value = value
   ) %>%
   # Keep only correlations with 'afd_rating'
-  filter(x == "afd_rating" & x != y)
+  dplyr::filter(x == "afd_rating" & x != y)
 
 # Create a custom label mapping (this is just an example)
 custom_labels <- c(
   "inhabitants_zip_code" = "ZIP code",
   "cent_inhabitants_mun" = "Centroid matching",
   "areal_inhabitants_mun" = "Areal matching",
-  "interpolation_inhabitants_mun" = "Areal interploation"
+  "interpolation_inhabitants_mun" = "Areal interpolation"
   # Add more mappings as needed
 )
 
 # Plot the correlation coefficients as a bar chart with correlation values as labels
-ggplot(correlations_long, aes(x = y, y = value, fill = value)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  scale_fill_viridis(option = "D") +  # Apply viridis color scale
-  labs(title = "Correlation of Population Density Variables with AFD Rating",
+ggplot2::ggplot(correlations_long, ggplot2::aes(x = y, y = value, fill = value)) +
+  ggplot2::geom_bar(stat = "identity", show.legend = FALSE) +
+  viridis::scale_fill_viridis(option = "D") +  # Apply viridis color scale
+  ggplot2::labs(title = "Correlation of Population Density Variables with AFD Rating",
        x = "Population Density Variables",
        y = "Correlation with AFD Rating") +
   # Customize the x-axis labels with custom names
-  scale_x_discrete(labels = custom_labels) + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  ggplot2::scale_x_discrete(labels = custom_labels) + 
+  ggplot2::theme_minimal() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
 
 ```
 
 # Conclusion and recommendations
 
-In this tool application, we evaluated three matching methods—centroid matching, area matching, and area-weighted interpolation—to link survey data with geospatial context variables in order to investigate whether population density is associated with support for far-right parties in Germany.
+In this tool application, we evaluated three matching methods—centroid matching, areal matching, and area-weighted interpolation—to link survey data with geospatial context variables in order to investigate whether population density is associated with support for far-right parties in Germany.
 
 Our findings indicate that, while all three methods show slight deviations from the real population estimates (derived from simulated point locations), they generally produce similar results in terms of accuracy. In terms of consistency, subtle differences were observed: centroid matching performed slightly better in densely populated areas, while area-weighted interpolation yielded the best results on average across the entire study area. However, despite these variations, the choice of matching method had minimal impact on the research outcomes, including the correlation between AfD ratings and population density.
 
@@ -1380,8 +1371,8 @@ Our top three recommendations (tbd mit Stefan):
 
 Choosing a matching method, however, is only one aspect of the researcher's decision-making process and does not absolve them from the conceptual considerations inherent in the linking process: how to define the "neighborhood".
 
-When defining neighborhoods, researchers must decide which geographic unit best captures the relevant social or environmental context. Different definitions of "neighborhood" can lead to different conclusions about the relationships between spatial context and outcomes like political preferences. 
-For example, the uncertain geographic unit problem (UGP) highlights the importance of carefully considering spatial boundaries in social research. The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as political participation or support for far-right parties.
+When defining neighborhoods, researchers must decide which geographic unit best captures the relevant social or environmental context. Different definitions of "neighborhood" can lead to different conclusions about the relationships between spatial context and outcomes, like political preferences. 
+For example, the uncertain geographic unit problem (UGP) [@kwan_uncertain_2012] highlights the importance of carefully considering spatial boundaries in social research. The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as political participation or support for far-right parties.
 
 The methods evaluated in this application provide different ways of addressing the challenges posed by mismatched or incongruent boundaries when defining a "neighborhood." However, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and contextual data.
 
