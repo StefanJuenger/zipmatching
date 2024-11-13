@@ -490,6 +490,7 @@ color_mapping1 <- c(
 # Set desired legend order
 desired_order1 <- c("Municipality 1", "ZIP Code", "Centroid")
 
+
 # Plot for municipality1
 map1 <- ggplot2::ggplot() +
   ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order1)), alpha = 0.4, color = "black") +
@@ -498,7 +499,9 @@ map1 <- ggplot2::ggplot() +
   ggplot2::scale_fill_manual(values = color_mapping1, name = "Layers") +
   ggplot2::labs(title = "High Accuracy") +
   ggplot2::theme_minimal() +
-  ggplot2::theme(legend.position = "right")
+  ggplot2::theme(legend.position = "right", 
+                 plot.margin = unit(c(0.1, 0.1, 0.5, 0.1), "cm"),
+                 plot.title = element_text(size = 10))
 
 # Plot for municipality2
 map2 <- ggplot2::ggplot() +
@@ -508,18 +511,21 @@ map2 <- ggplot2::ggplot() +
   ggplot2::scale_fill_manual(values = color_mapping1, name = "Layers") +
   ggplot2::labs(title = "Low Accuracy") +
   ggplot2::theme_minimal() +
-  ggplot2::theme(legend.position = "right") 
+  ggplot2::theme(legend.position = "right", 
+                 plot.margin = unit(c(0.5, 0.1, 0.1, 0.1), "cm"),
+                 plot.title = element_text(size = 10))
 
 # Combine the two plots using patchwork
-
-centroid_map <- (map1 | map2) + patchwork::plot_layout(guides = "collect", ncol = 2) +
-  patchwork::plot_annotation(title = "Accuracy of Centroid Linking")
-
-# Save the combined plot
-ggplot2::ggsave("./test/centroid_map.png", centroid_map, dpi = 300, width = 8, height = 6, units = "in")
+(map1 / map2) +  
+  patchwork::plot_layout(guides = "collect", nrow = 2) +  
+  patchwork::plot_annotation(
+    title = "Accuracy of Centroid Linking",
+    theme = theme(plot.margin = unit(c(0.1, 0, 0.1, 0), "cm"))
+  )
 
 
 ```
+
 
 One benefit of this approach is its simplicity and efficiency, allowing for a quick linking process. 
 However, a drawback is that it may overlook important local variations, as the centroid may not accurately reflect the distribution of residents or land use within the ZIP code area, nor does it account for the actual overlap or shape of the units.
@@ -1155,7 +1161,12 @@ difference_histogram <-
   # Limit x-axis for a clear view of the distribution
   ggplot2::xlim(-2500000, 2500000) +
   # Create a separate histogram for each matching method type
-  ggplot2::facet_wrap(~`Type`)
+  ggplot2::facet_wrap(~`Type`, labeller = ggplot2::label_wrap_gen(width = 30)) + 
+   ggplot2::theme_minimal() +  # Apply minimal theme
+  # Wrap the facet labels
+  ggplot2::theme(
+    strip.text = ggplot2::element_text(size = 8) # Adjust font size
+  )
 
 difference_histogram
 
@@ -1199,7 +1210,11 @@ difference_densities <-
   # Set x-axis limits to focus on main data range
   ggplot2::xlim(-10, 10) +
   # Separate density plots by type of matching method
-  ggplot2::facet_wrap(~`Type`)
+  ggplot2::facet_wrap(~`Type`, labeller = ggplot2::label_wrap_gen(width = 30)) +   ggplot2::theme_minimal() +  # Apply minimal theme
+  # Wrap the facet labels
+  ggplot2::theme(
+    strip.text = ggplot2::element_text(size = 8) # Adjust font size
+  )
 
 difference_densities
 
@@ -1225,7 +1240,8 @@ diff_real_zip_code_aggregated_map <-
     data = diff_real_zip_code_aggregated, aes(fill = min_method), lwd = 0
   ) +
   # Use viridis color scale to differentiate methods
-  scale_fill_viridis_d()
+  scale_fill_viridis_d() +
+  ggplot2::theme_minimal()   # Apply minimal theme
 
 # Save the map plot to a file ----
 ggplot2::ggsave(
@@ -1247,7 +1263,8 @@ diff_real_zip_code_aggregated_map_differences <-
   ) +
   # Use viridis color scale to differentiate differences
   scale_fill_viridis_c() +
-  ggplot2::facet_wrap(~min_method)
+  ggplot2::facet_wrap(~min_method) +
+  ggplot2::theme_minimal()   # Apply minimal theme
 
 diff_real_zip_code_aggregated_map
 
