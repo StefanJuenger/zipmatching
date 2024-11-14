@@ -5,7 +5,9 @@ author:
   - "Anne Stroppe"
   - "Stefan Jünger"
 image: img/logo_areamatch.jpg
+image-alt: logo
 bibliography: references.bib
+format: html
 ---
 
 
@@ -386,7 +388,7 @@ points_in_zip_codes <-
 points_with_real_inhabitants_municipality <-
   points_in_zip_codes |>
   # Join points with municipality data
-  sf::st_join(municipalities) |>
+  sf::st_join(municipalities |> dplyr::select(-area_municipality)) |>
   # Rename population column for clarity
   dplyr::rename(real_inhabitants_municipality = inhabitants_municipality)
 
@@ -654,7 +656,7 @@ color_mapping2 <- c(
   "Municipality 1" = viridis::viridis(5)[1],  # Color for Municipality 1
   "Municipality 2" = viridis::viridis(5)[2],  # Color for Municipality 2
   "ZIP Code" = viridis::viridis(5)[3],        # Color for ZIP Code
-  "Overlap" = viridis::viridis(5)[4]          # Color for Overlap
+  "Largest Overlap" = viridis::viridis(5)[4]          # Color for Overlap
 )
 
 # Set desired legend order
@@ -665,7 +667,7 @@ ggplot2::ggplot() +
   ggplot2::geom_sf(data = municipality1, aes(fill = factor("Municipality 1", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 1
   ggplot2::geom_sf(data = municipality2, aes(fill = factor("Municipality 2", levels = desired_order2)), alpha = 0.3, color = "black") +  # Color for Municipality 2
   ggplot2::geom_sf(data = zip_code1, aes(fill = factor("ZIP Code", levels = desired_order2)), alpha = 0.8, color = "black") +      # Color for ZIP Code
-  ggpattern::geom_sf_pattern(data = overlap, aes(fill = factor("Overlap", levels = desired_order2)), 
+  ggpattern::geom_sf_pattern(data = overlap, aes(fill = factor("Largest Overlap", levels = desired_order2)), 
                   pattern = "stripe", pattern_fill = "black", pattern_spacing = 0.02, pattern_density = 0.02, alpha = 0.6, color = "grey") +  # Closer stripe pattern for Overlap
   ggplot2::scale_fill_manual(values = color_mapping2, 
                     name = "Layers") +  # Use the named vector for specific colors
@@ -677,16 +679,9 @@ ggplot2::ggplot() +
 ```
 
 The `sf::st_join` function identifies which municipality overlaps with each ZIP code area. 
-The `largest = TRUE` argument indicates that if a ZIP code overlaps with multiple municipalities, it will only keep the municipality with the largest overlapping area.
-
-In comparison to centroid matching, areal matching takes the full geographic shape of the ZIP code area into account, providing a more precise association with municipalities based on actual boundaries. 
-One drawback of areal matching is that it can be computationally more intensive, especially when working with a large number of areal units. 
-Another complication is that if multiple municipalities overlap with a ZIP code, additional decisions must be made about which municipality to assign.
-In this application, we take a straightforward approach and assign the municipality with the largest overlap.
-However, if the overlap shares are equal, this could resemble a coin toss.
+The `largest = TRUE` argument indicates that if a ZIP code overlaps with multiple municipalities, it will only keep the attributes, e.g. the number of inhabitants, of the municipality with the largest overlapping area.
 
 ```{r}
-
 
 # Areal matching method ----
 
@@ -702,6 +697,171 @@ areal_matched <-
   dplyr::arrange(zip_code)
 
 ```
+
+
+Compared to centroid matching, areal matching considers the full geographic shape of ZIP code areas, providing a more accurate association with municipalities based on actual boundaries. One drawback of areal matching is that it can be more computationally intensive, especially when dealing with a large number of geographic units.
+
+Another challenge arises when multiple municipalities overlap with a single ZIP code, requiring additional decisions about which municipality to assign. In this application, we take a straightforward approach and assign the municipality with the largest overlap.
+
+However, we can also explore the number of municipalities each ZIP code overlaps with. 
+To do this, we can modify the code to calculate the number of overlapping municipalities, as well as the share of area overlap.
+
+
+```{r}
+
+areal_matched <- zip_codes_valid |>
+  # Perform the spatial join using the largest overlap municipality for each ZIP code
+  sf::st_join(municipalities, left = TRUE, largest = TRUE) |>
+  # Count the number of municipalities that overlap each ZIP code
+  dplyr::group_by(zip_code) |>
+  #Identify ambiguous cases (those with more than 1 municipality)
+  dplyr::mutate(num_municipalities_overlap = n()) |>
+  # Select relevant columns
+  dplyr::select(zip_code, inhabitants_zip_code, inhabitants_municipality, area_municipality, num_municipalities_overlap) |>
+  # Remove duplicates to ensure each ZIP code is listed once
+  dplyr::distinct()
+
+# Filter ambiguous cases: ZIP codes with more than one municipality overlap
+ambiguous_cases <- areal_matched |>
+  dplyr::filter(num_municipalities_overlap > 1)
+
+# Spatial intersection between ZIP codes and municipalities
+overlap_areas <- sf::st_intersection(ambiguous_cases, municipalities)
+
+# Calculate overlap area and share of overlap
+overlap_areas <- overlap_areas %>%
+  dplyr::mutate(
+    overlap_area = sf::st_area(.),  # Area of overlap
+    total_zip_area = sf::st_area(
+      ambiguous_cases[match(zip_code, ambiguous_cases$zip_code),]), # ZIP code area
+    share_of_overlap = overlap_area / total_zip_area  # Calculate share of overlap
+  )
+
+```
+
+We use this information to generate summary plots that highlight the uncertainty introduced by the areal matching method in the linking process.
+
+
+```{r, echo = F}  
+
+# Create summary table: count ZIP codes by number of overlapping municipalities
+overlap_summary <- areal_matched %>%
+  dplyr::group_by(num_municipalities_overlap) %>%
+  dplyr::summarise(num_zip_codes = n()) %>%
+  dplyr::arrange(num_municipalities_overlap)
+
+# Create bar chart of ZIP code overlap counts
+summary_table_plot <- 
+  ggplot2::ggplot(overlap_summary,
+                  aes(x = as.factor(num_municipalities_overlap), 
+                      y = num_zip_codes)) +
+  ggplot2::geom_col(fill = viridis::viridis(5)[1]) +  # Bar chart for overlap
+  ggplot2::labs(
+    title = "Summary of ZIP Code Overlaps",  # Title for the plot
+    x = "Number of Overlapping Municipalities",  # X-axis label
+    y = "Number of ZIP Codes"  # Y-axis label
+  ) +
+  ggplot2::theme_minimal() +  # Minimal plot theme
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(hjust = 0.5),  # Center title
+    axis.text.x = ggplot2::element_text(angle = 0)  # Horizontal X labels
+  )
+
+
+# Create density plot for share of overlap in ambiguous cases
+density_plot <- 
+  ggplot2::ggplot(overlap_areas, aes(x = as.numeric(share_of_overlap))) +
+  ggplot2::geom_density(fill = viridis::viridis(5)[1], color = "black", 
+                        alpha = 0.6) +  # Density plot
+  ggplot2::labs(
+    title = "Aggregated Distribution of Overlap Shares",  # Title for density plot
+    x = "Share of Overlap",  # X-axis label
+    y = "Density"  # Y-axis label
+  ) +
+  ggplot2::theme_minimal() +  # Minimal plot theme
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(hjust = 0.5),  # Center title
+    axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5), # Readable X labels
+    axis.text.y = ggplot2::element_text(angle = 0)  # Clear Y labels
+  )
+
+# Combine the bar chart and density plot side by side using patchwork
+combined_plot <- summary_table_plot | 
+  density_plot + 
+  patchwork::plot_layout(ncol = 2, widths = c(3, 1))  # Layout: 2 columns
+
+# Display the combined plot
+combined_plot
+
+
+```
+About half of the sampled ZIP codes overlap with more than one municipality, which we refer to as "ambiguous" cases. 
+However, when examining the share of area overlaps, most of these cases are less ambiguous than initially expected.
+ZIP code areas that overlap with multiple municipalities often have extreme overlap shares: either more than 90% of the area is shared with one municipality, or less than 10% overlaps with others. 
+Very few cases show nearly equal overlap between two or more municipalities, making the decision to link to the largest municipality in most of this cases indisputable.
+
+We can also map ZIP codes that overlap with one (black outline) or more municipalities (pink outline) in our sample, with the underlying map displaying the (logged) population size of each municipality. 
+
+```{r, echo = F}
+
+
+# Create a map of ambiguous cases
+ambiguous_cases_map <- ggplot2::ggplot() +
+  
+  # Municipality population as background, with transparency
+  ggplot2::geom_sf(
+    data = municipalities, aes(fill = as.numeric(inhabitants_municipality)), 
+    color = NA, alpha = 0.7  # Transparent fill for better visibility
+  ) +
+  
+  # Add ZIP code borders with no fill (no gray for NA)
+  ggplot2::geom_sf(
+    data = zip_codes_valid, aes(color = "ZIP Code Border", fill = NA), 
+    lwd = 0.5, alpha = 0  # Only borders, no fill
+  ) +
+  
+  # Add ambiguous ZIP codes with pink borders
+  ggplot2::geom_sf(
+    data = ambiguous_cases, aes(color = "Ambiguous ZIP Code", fill = NA), 
+    lwd = 0.5, alpha = 0  # Pink border, no fill
+  ) +
+  
+  # Apply minimal theme for clean visualization
+  ggplot2::theme_minimal() +
+  
+  # Color scale for municipality population (log scale)
+  ggplot2::scale_fill_viridis_c(
+    name = "Number of Inhabitants",  # Legend title
+    trans = "log"  # Log scale for better population range display
+  ) +
+  
+  # Manual color scale for the two layers (no fill, only borders)
+  ggplot2::scale_color_manual(
+    name = "Legend",  # Title for the border color legend
+    values = c("Unambiguous ZIP Code" = "black", "Ambiguous ZIP Code" = "#EA4F88"),  # Set colors for borders
+    guide = ggplot2::guide_legend(override.aes = list(lwd = 1))  # Ensure the lines appear clearly in the legend
+  ) +
+  
+  # Map title
+  ggplot2::labs(
+    title = "Map of Ambiguous ZIP Codes"
+  )
+
+# Display the map
+ambiguous_cases_map
+
+
+
+
+```
+
+ZIP codes that overlap with multiple municipalities are not concentrated in any specific region; they are spread across all federal states. 
+However, there appears to be a partial correlation between a municipality's population size and the likelihood of ZIP code areas overlapping with multiple municipalities. 
+In other words, in less densely populated areas, ZIP codes are more likely to span multiple municipal borders.
+
+Overall, the clusters of overlapping ZIP codes are not very pronounced, and the distribution of overlap shares does not raise significant concerns about the performance of the areal matching approach. 
+The steps we have outlined here can serve as a guide for others using areal matching.
+These steps help assess whether linking to the largest municipality is justifiable based on the data or if alternative thresholds or robustness tests should be considered.
 
 ### Areal interpolation
 
@@ -872,7 +1032,7 @@ In our example, we also need the interpolated area size, so we repeat the step.
 ```{r}
 
 # Perform area-weighted interpolation for the area
-areal_interpolation_matched2 <- sf::st_interpolate_aw(
+areal_interpolation_matched <- sf::st_interpolate_aw(
   # Use municipality are data for interpolation
   municipalities["area_municipality"],
   # Target zip code areas for the interpolation
@@ -905,7 +1065,6 @@ For advanced users, we would also like to point out the package [`areal`](https:
 
 ## Assessing the matching methods
 
-<!-- exchange for population density? -->
 
 ### Data preparation
 
@@ -1030,14 +1189,14 @@ differences <-
     prop_more_or_less_correct = mean(more_or_less_correct, na.rm = TRUE)
   )
 
-
 ```
 
 Lastly, we calculate the differences in estimated inhabitants between the different matching methods to better evaluate their performance. 
-These calculations are stored as new variables, each labeled with the corresponding matching comparison type.
+These calculations are stored as new variables, each labeled with the corresponding matching method.
 
 ```{r}
-# Calculate the differences between inhabitants estimated by Centroid Matching and Areal Matching ----
+# Calculate the differences between inhabitants estimated by 
+# Centroid Matching and Areal Matching 
 diff_centroid_areal <-
   # Create a new tibble (data frame) to store the differences
   tibble::tibble(
@@ -1049,7 +1208,8 @@ diff_centroid_areal <-
       areal_matched$inhabitants_municipality
   )
 
-# Calculate the differences between inhabitants estimated by Centroid Matching and Areal Interpolation Matching ----
+# Calculate the differences between inhabitants estimated by Centroid Matching 
+# and Areal Interpolation Matching
 diff_centroid_interpolated <-
   # Create a new tibble to store the differences
   tibble::tibble(
@@ -1061,7 +1221,8 @@ diff_centroid_interpolated <-
       areal_interpolation_matched$inhabitants_municipality
   )
 
-# Calculate the differences between inhabitants estimated by Areal Matching and Areal Interpolation Matching ----
+# Calculate the differences between inhabitants estimated by Areal Matching and 
+# Areal Interpolation Matching
 diff_areal_interpolated <-
   # Create a new tibble to store the differences
   tibble::tibble(
@@ -1233,9 +1394,9 @@ By examining the pairwise comparisons of the matching methods, we can determine 
 Overall, we observe that the differences between the matching methods are relatively small, as all three density plots are centered around zero. This suggests that the compared matching methods produce similar results when linking the data.
 
 While the location of the peak tells us about the magnitude of the differences, the width of the distribution reflects the variability of those differences.
-
-When comparing centroid and areal matching, we observe a slightly wider density plot, suggesting that these methods may perform differently in certain areas. 
-In contrast, the other plots indicate small and consistent differences, implying that the respective methods perform similarly across the data.
+The first plot indicates small and consistent differences, implying that the centroid and areal matching perform similarly across the data.
+In contrast, when comparing centroid matching with the two other matching methods, we observe two slightly wider density plots.
+The plots suggest that the number of inhabitants estimated by centroid matching  differs - at least in some areas - from the estimation of the areal matching and areal interpolation.
 
 ```{r}
 
@@ -1261,7 +1422,8 @@ difference_densities <-
   # Set x-axis limits to focus on main data range
   ggplot2::xlim(-10, 10) +
   # Separate density plots by type of matching method
-  ggplot2::facet_wrap(~`Type`, labeller = ggplot2::label_wrap_gen(width = 30)) +   ggplot2::theme_minimal() +  # Apply minimal theme
+  ggplot2::facet_wrap(~`Type`, labeller = ggplot2::label_wrap_gen(width = 30)) +  
+  ggplot2::theme_minimal() +  # Apply minimal theme
   # Wrap the facet labels
   ggplot2::theme(
     strip.text = ggplot2::element_text(size = 8) # Adjust font size
@@ -1271,13 +1433,14 @@ difference_densities
 
 
 ```
-To further assess the performance of the matching methods in different areas, we create a map that allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes. The map shows which method results in the smallest difference when compared to the actual population values, as estimated via the simulated points.
+
+To further assess the performance of the matching methods in different areas, we create a map that allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.
+The map shows which method results in the smallest difference when compared to the actual population values, as estimated via the simulated points.
 
 This map allows us to identify which method is most consistently successful at minimizing population differences across ZIP codes.
-
-We observe that different matching methods perform better in certain regions. For example, in densely populated areas like cities, ZIP codes are often contained within a single municipality, so centroid matching performs particularly well in these areas. On average, areal interpolation, which takes multiple factors into account, performs the best across the entire study area.
+We observe that different matching methods perform better in certain regions. 
+For example, in densely populated areas like cities, ZIP codes are often contained within a single municipality, so centroid matching performs particularly well in these areas. On average, areal interpolation, which takes multiple factors into account, performs the best across the entire study area.
 However, this method requires (all) spatial variables of interest to be available for the matching process, which may not always be the case and can be very resource-intensive.
-<!-- hier kann man leider wenig sehen: ggfs. doch mit gesamt karte austauschen? -->
 
 ```{r}
 
@@ -1328,21 +1491,9 @@ Finally, we aim to assess whether and how the different matching methods influen
 Rather than developing an elaborate model, we take a more straightforward approach by examining the correlation between our variable of interest—the AfD rating — and the matched context variable.
 Since we are not interested in the absolute value of inhabitants but the population density, we calculate the population density accordingly.
 
-As shown in the plot, there are only marginal differences in the correlation coefficients between the various matching methods. 
-This suggests that, as previously indicated, the linking processes perform similarly across these matching methods.
-
-From a substantive perspective, the correlations are consistently small and close to zero. 
-Specifically, we observe that living in areas with higher population density is weakly correlated with lower AfD ratings.
-In other words, individuals living in more densely populated areas tend to support the AfD less — although the strength of this bivariate relationship is marginal.
-
-In a more complex model, especially when controlling for individual-level characteristics, the relationship may change. 
-Not only could the strength of the correlation differ, but the differences between matching methods could also become more pronounced. 
-Similarly, the results may vary when matching other spatial units. For 
-example, the analysis could yield a different picture when matching electoral districts, which by design have a similar number of inhabitants but vary significantly in area size.
-In conclusion, we recommend, whenever computationally and data-wise feasible, checking the robustness of results across different matching methods.
-
 ```{r}
 
+# Linking the datasets
 linked_survey <-
   survey |>
   # Left join with centroid_matched, dropping geometry information
@@ -1359,7 +1510,7 @@ linked_survey <-
   dplyr::rename(areal_inhabitants_mun = inhabitants_municipality,
                 areal_area_mun = area_municipality) |>
   # Left join with areal_interpolation_matched, dropping specific columns and geometry
-  dplyr::left_join(areal_interpolation_matched2 |>
+  dplyr::left_join(areal_interpolation_matched |>
                      sf::st_drop_geometry() |>
                      dplyr::select(-inhabitants_zip_code), by = "zip_code") |>
   # Rename columns for clarity
@@ -1376,7 +1527,7 @@ linked_survey <-
 # Calculate pairwise correlations with 'afd_rating' and columns containing 'population density'
 correlations <- linked_survey |>
   dplyr::select(afd_rating, contains("pop_dens")) |>
-  corrr::correlate(use = "pairwise.complete.obs") 
+  corrr::correlate(use = "pairwise.complete.obs")
 
 # Melt the correlation matrix into a long format
 correlations_long <- correlations %>%
@@ -1405,34 +1556,48 @@ ggplot2::ggplot(correlations_long, ggplot2::aes(x = y, y = value, fill = value))
        x = "Population Density Variables",
        y = "Correlation with AFD Rating") +
   # Customize the x-axis labels with custom names
-  ggplot2::scale_x_discrete(labels = custom_labels) + 
+  ggplot2::scale_x_discrete(labels = custom_labels) +
   ggplot2::theme_minimal() +
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
 
 ```
 
+As shown in the plot, there are only marginal differences in the correlation coefficients between the various matching methods. 
+This suggests that, as previously indicated, the linking processes perform similarly across these matching methods.
+
+From a substantive perspective, the correlations are consistently small and close to zero. 
+Specifically, we observe that living in areas with higher population density is weakly correlated with lower AfD ratings.
+In other words, individuals living in more densely populated areas tend to support the AfD less — although the strength of this bivariate relationship is marginal.
+
+In a more complex model, especially when controlling for individual-level characteristics, the relationship may change. 
+Not only could the strength of the correlation differ, but the differences between matching methods could also become more pronounced. 
+Similarly, the results may vary when matching other spatial units. For 
+example, the analysis could yield a different picture when matching electoral districts, which by design have a similar number of inhabitants but vary significantly in area size.
+In conclusion, we recommend, whenever computationally and data-wise feasible, checking the robustness of results across different matching methods.
+
+
 # Conclusion and recommendations
 
-In this tool application, we evaluated three matching methods — centroid matching, areal matching, and area-weighted interpolation — to link survey data with geospatial context variables in order to investigate whether population density is associated with support for far-right parties in Germany.
+In this tool application, we evaluated three matching methods—centroid matching, areal matching, and area-weighted interpolation—to link survey data with geospatial context variables for overlapping but incongruent spatial units. Our goal was to assess the accuracy of each method, compare their consistency, and ultimately evaluate their impact on our research question: Is there an association between population density and far-right political preferences, and is this association robust?
 
-Our findings indicate that, while all three methods show slight deviations from the real population estimates (derived from simulated point locations), they generally produce similar results in terms of accuracy. In terms of consistency, subtle differences were observed: centroid matching performed slightly better in densely populated areas, while area-weighted interpolation yielded the best results on average across the entire study area. However, despite these variations, the choice of matching method had minimal impact on the research outcomes, including the correlation between AfD ratings and population density.
+Our findings indicate that while all three methods show slight deviations from the actual population estimates (derived from simulated point locations), they generally produce similar results in terms of accuracy. In terms of consistency, subtle differences were observed: centroid matching performed slightly better in densely populated areas, while area-weighted interpolation provided the most reliable results on average across the entire study area. Despite these variations, the choice of matching method had minimal impact on the research outcomes, such as the correlation between AfD ratings and population density.
 
-Our top three recommendations:
+Key Takeaways:
 
-- One
-- Two
-- Three
+- **Centroid matching**: Although it does not account for the area of overlap or local population variations, centroid matching performs surprisingly well in certain cases when linking ZIP code areas and municipalities in Germany. It offers a good trade-off between efficiency and quality, particularly in areas where the target spatial unit is known to lie within the source unit.
+- **Areal matching**: We recommend investigating the ambiguity in the matching process, such as the number of source units with which the target unit overlaps, the area shares of the overlap, and the spatial clusters of ambiguous cases. Additional robustness checks and flagging of ambiguous cases may be necessary depending on the spatial units involved, particularly when the target unit overlaps significantly with (many) source units.
+- **Area-weighted interpolation**: This method addresses the limitation of areal matching by interpolating data from all overlapping units. However, it has the highest computational requirements and data needs. In our example, it did not clearly outperform the other methods but provided the most consistent results across all spatial units.
+- **Robustness Checks**: To ensure the reliability of findings, researchers should assess the robustness of their matching method by comparing it with at least one alternative approach. This is especially important when exploring how contextual information, such as population density or other geographical factors, is associated with individual-level attitudes or behavior. Robustness checks help confirm that the observed relationships are not influences by the matching process but show robust associations.
 
-Choosing a matching method, however, is only one aspect of the researcher's decision-making process and does not absolve them from the conceptual considerations inherent in the linking process: how to define the "neighborhood".
-
-When defining neighborhoods, researchers must decide which geographic unit best captures the relevant social or environmental context. Different definitions of "neighborhood" can lead to different conclusions about the relationships between spatial context and outcomes, like political preferences. 
-For example, the uncertain geographic context problem (UGCoP) [@kwan_uncertain_2012] highlights the importance of carefully considering spatial boundaries in social research. The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as political participation or support for far-right parties.
-
-The methods evaluated in this application provide different ways of addressing the challenges posed by mismatched or incongruent boundaries when defining a "neighborhood." However, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and contextual data.
+Choosing the most suitable matching method is just one part of the equation.
+While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings.
+One critical element is the definition of the "neighborhood" — the geographic unit that best captures the relevant social or environmental context for the research question under investigation.
+For example, the uncertain geographic context problem (UGCoP) [@kwan_uncertain_2012] highlights the importance of carefully considering spatial boundaries in social research. 
+The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as support for far-right parties.
+The methods evaluated in this application provide different ways of addressing the challenges of mismatched or incongruent boundaries when defining a "neighborhood." 
+Still, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and contextual data.
 
 
 # References
-
-# Additional material
 
