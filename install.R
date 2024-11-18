@@ -1,4 +1,4 @@
-install.packages("corr")
+install.packages("corrr")
 install.packages("dplyr")
 install.packages("ggpattern")
 install.packages("ggplot2")
