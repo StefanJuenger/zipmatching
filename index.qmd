@@ -1531,13 +1531,15 @@ correlations <- linked_survey |>
 
 # Melt the correlation matrix into a long format
 correlations_long <- correlations %>%
-  reshape2::melt(id.vars = "term") %>%
-  dplyr::rename(
-    x = term,
-    y = variable,
-    value = value
+  # Pivot the data into long format
+  tidyr::pivot_longer(
+    cols = -term,        # Keep the 'term' column as is
+    names_to = "y",      # New column 'y' for variable names
+    values_to = "value"  # New column 'value' for correlation values
   ) %>%
-  # Keep only correlations with 'afd_rating'
+  # Rename 'term' column to 'x' for consistency
+  dplyr::rename(x = term) %>%
+  # Filter for correlations with 'afd_rating' and not with itself
   dplyr::filter(x == "afd_rating" & x != y)
 
 # Create a custom label mapping (this is just an example)
@@ -1590,13 +1592,12 @@ Key Takeaways:
 - **Area-weighted interpolation**: This method addresses the limitation of areal matching by interpolating data from all overlapping units. However, it has the highest computational requirements and data needs. In our example, it did not clearly outperform the other methods but provided the most consistent results across all spatial units.
 - **Robustness Checks**: To ensure the reliability of findings, researchers should assess the robustness of their matching method by comparing it with at least one alternative approach. This is especially important when exploring how contextual information, such as population density or other geographical factors, is associated with individual-level attitudes or behavior. Robustness checks help confirm that the observed relationships are not influences by the matching process but show robust associations.
 
-Choosing the most suitable matching method is just one part of the equation.
-While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings.
-One critical element is the definition of the "neighborhood" — the geographic unit that best captures the relevant social or environmental context for the research question under investigation.
+Still, choosing the most suitable matching method is just one part of the equation.
+While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings: whatt is the geographic unit that best captures the relevant social or environmental context for the research question under investigation.
 For example, the uncertain geographic context problem (UGCoP) [@kwan_uncertain_2012] highlights the importance of carefully considering spatial boundaries in social research. 
 The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as support for far-right parties.
 The methods evaluated in this application provide different ways of addressing the challenges of mismatched or incongruent boundaries when defining a "neighborhood." 
-Still, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and contextual data.
+Still, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and geospatial data.
 
 
 # References

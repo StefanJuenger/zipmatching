@@ -1,3 +1,4 @@
+install.packages("corr")
 install.packages("dplyr")
 install.packages("ggpattern")
 install.packages("ggplot2")
@@ -5,3 +6,6 @@ install.packages("patchwork")
 install.packages("pbapply")
 install.packages("sf")
 install.packages("tibble")
+install.packages("tidyr")
+install.packages("viridis")
+
