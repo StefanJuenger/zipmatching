@@ -1,7 +1,11 @@
-# Required package names
-packages <- c("dplyr", "ggplot2", "patchwork", "sf", "tibble")
+install.packages("corrr")
+install.packages("dplyr")
+install.packages("ggpattern")
+install.packages("ggplot2")
+install.packages("patchwork")
+install.packages("pbapply")
+install.packages("sf")
+install.packages("tibble")
+install.packages("tidyr")
+install.packages("viridis")
 
-# Install missing packages
-install.packages(setdiff(packages, rownames(installed.packages())),
-                 dependencies = TRUE
-                 )

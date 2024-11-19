@@ -2,5 +2,7 @@
 .Rproj
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
 raw-data/
+zipmatching.Rproj
