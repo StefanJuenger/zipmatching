@@ -55,7 +55,7 @@ Consequently, citizens may become more susceptible to far-right narratives, whic
 Therefore, one central research question is: Is living in a less densely populated area, such as a rural place, associated with far-right party preferences?
 To answer this question, it is necessary to link survey data with information about the respondents’ living environment.
 
-The linking process is crucial to answer this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g. overlapping geospatial units that do not share a common border.
+The linking process is crucial to answering this research question but is prone to certain pitfalls, such as incongruent geospatial units, e.g. overlapping geospatial units that do not share a common border.
 In many (online) surveys, respondents can indicate where they live by, for example, entering the ZIP code of their home address. 
 This information allows for the linking of contextual information about the respondents’ living environment, like population density, to the survey data. 
 However, contextual information is often not available at the ZIP code level.
@@ -167,7 +167,7 @@ Respondents were asked to indicate their approval of the German radical right pa
 At the end of the questionnaire, they were also asked to enter the 5-digit ZIP code of their primary residence (variable t71).
 
 ::: {.callout-important}
-Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data but only accessed through the [Secure Data Center at GESIS](https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc){target="_blank"}. For this tool application, we provide simulated data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence or the interviewee.
+Due to data protection regulations, ZIP codes cannot be published in the Scientific Use Files of the survey data, but only accessed through the [Secure Data Center at GESIS](https://www.gesis.org/en/services/processing-and-analyzing-data/analysis-of-sensitive-data/secure-data-center-sdc){target="_blank"}. For this tool application, we provide simulated data that reproduces the real correlation of the GLES data without allowing conclusions to be drawn about the place of residence or the interviewee.
 :::
 
 The two additional data sources provide the necessary geographies of ZIP code areas and municipalities and their corresponding attributes. 
@@ -244,7 +244,7 @@ municipalities <-
 
 ```
 
-We also advice to always plot the data for a visual inspection of the prjection and completeness of the geospatial information.
+We also advise to always plot the data for a visual inspection of the projection and completeness of the geospatial information.
 
 ```{r, echo = F}
 
@@ -275,7 +275,7 @@ g_mun + g_zip
 
 Due to data protection regulations, we cannot use real-world survey data, but we base our tool application on simulated data that were created on  the basis of the [GLES Tracking November 2023, T56](https://search.gesis.org/research_data/ZA7714). 
 To prepare the simulated data, we clean the original survey data to retain only valid ZIP codes and then link the data with geospatial data using centroid and areal matching techniques, followed by area-weighted interpolation for population and area estimates. 
-Finally, we calculate correlations between the variable of interest, "afd_rating" and from the geospatial data derived population densities.
+Finally, we calculate correlations between the variable of interest, "afd_rating" and population densities derived from the geospatial data.
 In a next step, we generate random ZIP codes, introducing some invalid entries to mimic the real-world data.
 We repeat the linking process and then simulate the dependent variable based on the original correlations to derive the simulated data.
 To replicate the creation of the simulated survey data, we provide the R-Script [here](./test/create_simulated_survey.R).
@@ -663,7 +663,7 @@ color_mapping2 <- c(
 )
 
 # Set desired legend order
-desired_order2 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Overlap")
+desired_order2 <- c("Municipality 1", "Municipality 2", "ZIP Code", "Largest Overlap")
 
 # Create a plot
 ggplot2::ggplot() +
@@ -707,7 +707,7 @@ Compared to centroid matching, areal matching considers the full geographic shap
 Another challenge arises when multiple municipalities overlap with a single ZIP code, requiring additional decisions about which municipality to assign. In this application, we take a straightforward approach and assign the municipality with the largest overlap.
 
 However, we can also explore the number of municipalities each ZIP code overlaps with. 
-To do this, we can modify the code to calculate the number of overlapping municipalities, as well as the share of area overlap.
+To do this, we can modify the code to calculate the number of overlapping municipalities as well as the share of area overlap.
 
 
 ```{r}
@@ -801,7 +801,7 @@ combined_plot
 About half of the sampled ZIP codes overlap with more than one municipality, which we refer to as "ambiguous" cases. 
 However, when examining the share of area overlaps, most of these cases are less ambiguous than initially expected.
 ZIP code areas that overlap with multiple municipalities often have extreme overlap shares: either more than 90% of the area is shared with one municipality, or less than 10% overlaps with others. 
-Very few cases show nearly equal overlap between two or more municipalities, making the decision to link to the largest municipality in most of this cases indisputable.
+Very few cases show nearly equal overlap between two or more municipalities, making the decision to link to the largest municipality in most of these cases indisputable.
 
 We can also map ZIP codes that overlap with one (black outline) or more municipalities (pink outline) in our sample, with the underlying map displaying the (logged) population size of each municipality. 
 
@@ -1029,7 +1029,7 @@ areal_interpolation_matched <-
 
 ```
 
-If you have several variables of interest, you need to perform the areal interpolation seperately or create a function to loop over several columns. 
+If you have several variables of interest, you need to perform the areal interpolation separately or create a function to loop over several columns. 
 In our example, we also need the interpolated area size, so we repeat the step.
 
 ```{r}
@@ -1593,7 +1593,7 @@ Key Takeaways:
 - **Centroid matching**: Although it does not account for the area of overlap or local population variations, centroid matching performs surprisingly well in certain cases when linking ZIP code areas and municipalities in Germany. It offers a good trade-off between efficiency and quality, particularly in areas where the target spatial unit is known to lie within the source unit.
 - **Areal matching**: We recommend investigating the ambiguity in the matching process, such as the number of source units with which the target unit overlaps, the area shares of the overlap, and the spatial clusters of ambiguous cases. Additional robustness checks and flagging of ambiguous cases may be necessary depending on the spatial units involved, particularly when the target unit overlaps significantly with (many) source units.
 - **Area-weighted interpolation**: This method addresses the limitation of areal matching by interpolating data from all overlapping units. However, it has the highest computational requirements and data needs. In our example, it did not clearly outperform the other methods but provided the most consistent results across all spatial units.
-- **Robustness Checks**: To ensure the reliability of findings, researchers should assess the robustness of their matching method by comparing it with at least one alternative approach. This is especially important when exploring how contextual information, such as population density or other geographical factors, is associated with individual-level attitudes or behavior. Robustness checks help confirm that the observed relationships are not influences by the matching process but show robust associations.
+- **Robustness Checks**: To ensure the reliability of findings, researchers should assess the robustness of their matching method by comparing it with at least one alternative approach. This is especially important when exploring how contextual information, such as population density or other geographical factors, is associated with individual-level attitudes or behavior. Robustness checks help confirm that the observed relationships are not influenced by the matching process but show robust associations.
 
 Still, choosing the most suitable matching method is just one part of the equation.
 While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings: what is the geographic unit that best captures the relevant social or environmental context for the research question under investigation?
