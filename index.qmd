@@ -217,8 +217,11 @@ library(tibble)      # For creating and managing tibbles (data frames)
 In Germany, the 5-character ZIP code areas often do not align with municipal boundaries, leading to both overlap and incongruence. This mismatch can be more pronounced in rural areas, where larger ZIP code regions may encompass multiple small municipalities. In contrast, urban areas tend to have several distinct ZIP codes that fall within a single municipality. For example, the capital Berlin, as a German 'city-state', is one municipality with 190 ZIP codes.
 
 When selecting and loading the geospatial data, we always check for three sources of errors:
+
 - Consistent (projected) coordinate reference systems. In our case, both shapefiles are projected in WGS 84 (EPSG: 3857).
+
 - Timeliness of administrative boundaries and territorial reforms. For example, we use the 2022 municipality boundaries and the 2023 ZIP code areas.
+
 - Existence, column names, and format of identifiers and variables of interest. For instance, we require the ZIP code and municipality code to be in character format in our data frame.
 
 ```{r}
@@ -1593,7 +1596,7 @@ Key Takeaways:
 - **Robustness Checks**: To ensure the reliability of findings, researchers should assess the robustness of their matching method by comparing it with at least one alternative approach. This is especially important when exploring how contextual information, such as population density or other geographical factors, is associated with individual-level attitudes or behavior. Robustness checks help confirm that the observed relationships are not influences by the matching process but show robust associations.
 
 Still, choosing the most suitable matching method is just one part of the equation.
-While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings: whatt is the geographic unit that best captures the relevant social or environmental context for the research question under investigation.
+While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings: what is the geographic unit that best captures the relevant social or environmental context for the research question under investigation?
 For example, the uncertain geographic context problem (UGCoP) [@kwan_uncertain_2012] highlights the importance of carefully considering spatial boundaries in social research. 
 The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as support for far-right parties.
 The methods evaluated in this application provide different ways of addressing the challenges of mismatched or incongruent boundaries when defining a "neighborhood." 
