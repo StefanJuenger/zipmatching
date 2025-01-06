@@ -1,0 +1,26 @@
+cff-version: 1.0.0
+message: "If you use this tool, please cite it as below."
+title: "AreaMatch - Assessing Geospatial Linking of Incongruent Units"
+authors:
+  - family-names: "Stroppe"
+    given-names: "Anne"
+    affiliation: "GESIS - Leibniz Institute for the Social Sciences"
+    orcid: "https://orcid.org/0000-0002-1251-9235"
+  - family-names: "Jünger"
+    given-names: "Stefan"
+    affiliation: "GESIS - Leibniz Institute for the Social Sciences"
+    orcid: "https://orcid.org/0000-0001-8100-7957"
+  - family-names: "Straßegger"
+    given-names: "Fabienne"
+    affiliation: "GESIS - Leibniz Institute for the Social Sciences"
+date-released: "2024-11-28"
+version: "1.0.0"
+url: "https://kodaqs-toolbox.gesis.org/github.com/StefanJuenger/zipmatching/index/"
+repository-code: "https://github.com/StefanJuenger/zipmatching"
+keywords:
+  - "Data Linking"
+  - "Measurement Error"
+  - "Spatial Data"
+  - "Areal Matching"
+  - "Spatial Specification"
+
