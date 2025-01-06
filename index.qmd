@@ -4,6 +4,7 @@ subtitle: "Assessing Geospatial Linking of Incongruent Units"
 author: 
   - "Anne Stroppe"
   - "Stefan Jünger"
+  - "Fabienn Straßegger"
 image: img/logo_areamatch.jpg
 image-alt: logo
 bibliography: references.bib
