@@ -8,6 +8,7 @@
 
 <meta name="author" content="Anne Stroppe">
 <meta name="author" content="Stefan Jünger">
+<meta name="author" content="Fabienne Straßegger">
 
 <title>AreaMatch</title>
 <style>
@@ -114,6 +115,7 @@ div.csl-indent {
     <div class="quarto-title-meta-contents">
              <p>Anne Stroppe </p>
              <p>Stefan Jünger </p>
+             <p>Fabienne Straßegger </p>
           </div>
   </div>
     
@@ -229,7 +231,7 @@ Important
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">zip_code =</span> plz, <span class="at">inhabitants_zip_code =</span> einwohner)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `OSM_PLZ' from data source 
-  `H:\zipmatching\data-raw\PLZ_Gebiete_7155512659375659703.gpkg' 
+  `C:\Users\stroppan\Documents\zipmatching\data-raw\PLZ_Gebiete_7155512659375659703.gpkg' 
   using driver `GPKG'
 Simple feature collection with 8170 features and 4 fields
 Geometry type: MULTIPOLYGON
@@ -246,7 +248,7 @@ Projected CRS: WGS 84 / Pseudo-Mercator</code></pre>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">ags =</span> AGS, <span class="at">inhabitants_municipality =</span> EWZ, <span class="at">area_municipality =</span> KFL)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `GEM_ew_22' from data source 
-  `H:\zipmatching\data-raw\Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg' 
+  `C:\Users\stroppan\Documents\zipmatching\data-raw\Gemeindegrenzen_2022__mit_Einwohnerzahl_4398740898366155627.gpkg' 
   using driver `GPKG'
 Simple feature collection with 10990 features and 17 fields
 Geometry type: MULTIPOLYGON
@@ -1063,12 +1065,9 @@ Important
 </ul>
 <p>Still, choosing the most suitable matching method is just one part of the equation. While the technical aspects of matching can improve the accuracy and consistency of linking processes, they do not replace the need for careful consideration of the conceptual underpinnings: what is the geographic unit that best captures the relevant social or environmental context for the research question under investigation? For example, the uncertain geographic context problem (UGCoP) <span class="citation" data-cites="kwan_uncertain_2012">(<a href="#ref-kwan_uncertain_2012" role="doc-biblioref">Kwan 2012</a>)</span> highlights the importance of carefully considering spatial boundaries in social research. The choice of neighborhood unit can significantly affect the results, particularly when studying phenomena such as support for far-right parties. The methods evaluated in this application provide different ways of addressing the challenges of mismatched or incongruent boundaries when defining a “neighborhood.” Still, researchers must remain aware that the linking process should be guided by a clear understanding of how these spatial definitions shape the conclusions drawn from integrated survey and geospatial data.</p>
 </section>
-<section id="references" class="level1 unnumbered">
-
-
-</section>
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<section id="references" class="level1">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-gles_gles_2024" class="csl-entry" role="listitem">
 GLES. 2024. <span>“<span>GLES</span> <span>Tracking</span> <span>November</span> 2023, <span>T56</span>.”</span> GESIS. <a href="https://doi.org/10.4232/1.14243">https://doi.org/10.4232/1.14243</a>.
 </div>
@@ -1078,7 +1077,11 @@ Kwan, Mei-Po. 2012. <span>“The <span>Uncertain</span> <span>Geographic</span> 
 <div id="ref-prener_areal_2020" class="csl-entry" role="listitem">
 Prener, Christopher, and Charlie Revord. 2020. <span>“Areal: <span>An</span> <span>R</span> Package for Areal Weighted Interpolation.”</span> Zenodo. <a href="https://doi.org/10.5281/ZENODO.3822534">https://doi.org/10.5281/ZENODO.3822534</a>.
 </div>
-</div></section></div></main>
+</div>
+<p>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</p>
+</section>
+
+</main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
